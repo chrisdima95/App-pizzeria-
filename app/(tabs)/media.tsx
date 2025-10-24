@@ -26,20 +26,15 @@ const loadMaps = async () => {
   if (Platform.OS === 'web') return null;
   
   try {
-    // Controlla se siamo in Expo Go
-    const { default: Constants } = await import('expo-constants');
-    if (Constants.appOwnership === 'expo') {
-      console.log('react-native-maps non disponibile in Expo Go');
-      return null;
-    }
-    
+    // Prova a importare react-native-maps
+    // Se fallisce, probabilmente siamo in Expo Go dove non è disponibile
     const Maps = await import('react-native-maps');
     return {
       MapView: Maps.default,
       Marker: Maps.Marker
     };
   } catch (error) {
-    console.log('react-native-maps non disponibile:', error);
+    console.log('react-native-maps non disponibile (probabilmente in Expo Go):', error);
     return null;
   }
 };
