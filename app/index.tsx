@@ -16,7 +16,7 @@ export default function IndexScreen() {
 
   // Animazioni per la schermata di benvenuto
   const fadeIn = useSharedValue(0);
-  const scaleIn = useSharedValue(0.8);
+  const scaleIn = useSharedValue(0.9); // Ridotto da 0.8 a 0.9 per meno distorsione
   const titleTranslateY = useSharedValue(50);
   const subtitleTranslateY = useSharedValue(30);
 
@@ -53,6 +53,9 @@ export default function IndexScreen() {
   const containerAnimatedStyle = useAnimatedStyle(() => ({
     opacity: fadeIn.value,
     transform: [{ scale: scaleIn.value }],
+    // Proprietà per migliorare la qualità del rendering durante l'animazione
+    shouldRasterizeIOS: true,
+    renderToHardwareTextureAndroid: true,
   }));
 
   const titleAnimatedStyle = useAnimatedStyle(() => ({
@@ -73,6 +76,9 @@ export default function IndexScreen() {
           source={require('@/assets/images/Mascotte.png')} 
           style={styles.mascotteLogo}
           resizeMode="contain"
+          fadeDuration={0}
+          shouldRasterizeIOS={true}
+          renderToHardwareTextureAndroid={true}
         />
       </Animated.View>
       
@@ -107,9 +113,18 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   mascotteLogo: {
-    width: 120,
-    height: 120,
+    width: 150, // Aumentato per migliore qualità
+    height: 150, // Aumentato per migliore qualità
     marginBottom: 20,
+    borderRadius: 75, // Per mantenere la forma circolare
+    // Proprietà per migliorare la qualità del rendering
+    transform: [{ scale: 1 }], // Forza il rendering a scala 1:1
+    // Ombra per dare profondità e migliorare la percezione di nitidezza
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   welcomeTitle: {
     fontSize: 32,
