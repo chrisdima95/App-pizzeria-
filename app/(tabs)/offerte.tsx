@@ -1,64 +1,23 @@
 import { TabHeader } from "@/components/TabHeader";
 import { ThemedText } from "@/components/themed-text";
+import { PizzaWheel, type Offer } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrder } from "@/contexts/OrderContext";
+import { getAllOffers } from "@/data/offers";
 import { usePizzaModal } from "@/hooks/use-pizza-modal";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
-  FlatList,
+  ScrollView,
   StyleSheet,
-  TouchableOpacity,
   useColorScheme,
-  View,
+  View
 } from "react-native";
-
-type Offer = {
-  id: string;
-  name: string;
-  price: number;
-  description: string;
-  emoji: string;
-};
-
-const offers: Offer[] = [
-  {
-    id: "o1",
-    name: "Margherita Promo",
-    price: 4.99,
-    description: "Classica a prezzo speciale",
-    emoji: "🍕",
-  },
-  {
-    id: "o2",
-    name: "Diavola Promo",
-    price: 6.49,
-    description: "Piccante in sconto",
-    emoji: "🌶️",
-  },
-  {
-    id: "o3",
-    name: "Quattro Formaggi Promo",
-    price: 6.99,
-    description: "Formaggi selezionati",
-    emoji: "🧀",
-  },
-  {
-    id: "o4",
-    name: "Capricciosa Promo",
-    price: 7.49,
-    description: "Ricca e conveniente",
-    emoji: "🥓",
-  },
-];
 
 export default function OfferteScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
-  const cardBg = colors.card;
-  const mutedText = colors.muted;
-  const accent = colors.primary;
 
   const router = useRouter();
   const { addToOrder, redeemedOffers } = useOrder();
@@ -99,68 +58,51 @@ export default function OfferteScreen() {
     router.push("/checkout");
   };
 
+  const allOffers = getAllOffers();
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <TabHeader title="Offerte Speciali" showMascotte={false} />
-      <FlatList
-        data={offers}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ gap: 12, paddingVertical: 8 }}
-        style={{ width: "100%" }}
-        renderItem={({ item }) => {
-          const isRedeemed = redeemedOffers.includes(item.id);
-          return (
-            <View
-              style={[
-                styles.card,
-                {
-                  backgroundColor: cardBg,
-                  borderColor: colors.border,
-                  opacity: isRedeemed ? 0.6 : 1,
-                },
-              ]}
-            >
-              <ThemedText type="subtitle" style={styles.cardTitle}>
-                {item.emoji} {item.name}
-                {isRedeemed && (
-                  <ThemedText
-                    style={[styles.redeemedText, { color: colors.error }]}
-                  >
-                    {" "}
-                    - RISCATTA
-                  </ThemedText>
-                )}
-              </ThemedText>
-              <ThemedText style={[styles.description, { color: mutedText }]}>
-                {item.description}
-              </ThemedText>
-              <ThemedText style={[styles.price, { color: accent }]}>
-                €{item.price.toFixed(2)}
-              </ThemedText>
-              <TouchableOpacity
-                style={[
-                  styles.cta,
-                  {
-                    backgroundColor: isRedeemed ? colors.border : accent,
-                    opacity: isRedeemed ? 0.7 : 1,
-                  },
-                ]}
-                onPress={() => handleSelectOffer(item)}
-                disabled={isRedeemed}
-              >
-                <ThemedText
-                  style={[
-                    styles.ctaText,
-                    { color: isRedeemed ? colors.text : "white" },
-                  ]}
-                >
-                  {isRedeemed ? "Già riscattata" : "Riscatta offerta"}
-                </ThemedText>
-              </TouchableOpacity>
-            </View>
-          );
-        }}
-      />
+      
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <ThemedText type="title" style={styles.mainTitle}>
+            Ruota della Fortuna Pizza
+          </ThemedText>
+          <ThemedText style={[styles.subtitle, { color: colors.muted }]}>
+            Gira la ruota e vinci un'offerta speciale!
+          </ThemedText>
+        </View>
+
+        {/* Ruota della fortuna */}
+        <View style={styles.wheelSection}>
+          <PizzaWheel
+            offers={allOffers}
+            onOfferSelected={handleSelectOffer}
+            redeemedOffers={redeemedOffers}
+          />
+        </View>
+
+        {/* Footer con informazioni */}
+        <View style={[styles.footer, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <ThemedText style={[styles.footerTitle, { color: colors.primary }]}>
+            Come Funziona la Ruota
+          </ThemedText>
+          <ThemedText style={[styles.footerText, { color: colors.muted }]}>
+            • Swipa sulla ruota o premi "Gira la Ruota!" per iniziare{'\n'}
+            • La ruota gira velocemente per almeno 2 secondi{'\n'}
+            • Ogni offerta può essere riscattata una sola volta{'\n'}
+            • Registrati per riscattare le offerte vinte{'\n'}
+            • Buona fortuna! 🍕
+          </ThemedText>
+        </View>
+      </ScrollView>
+      
       <ModalComponent />
     </View>
   );
@@ -169,47 +111,50 @@ export default function OfferteScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    alignItems: "stretch",
   },
-  card: {
-    width: "100%",
-    borderRadius: 16,
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 32,
+  },
+  header: {
+    marginBottom: 24,
+    paddingTop: 8,
+  },
+  mainTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 16,
+    textAlign: "center",
+    lineHeight: 22,
+  },
+  footer: {
+    marginTop: 24,
     padding: 20,
-    gap: 8,
-    elevation: 3,
-    shadowColor: "#E53E3E",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    borderRadius: 16,
     borderWidth: 1,
   },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  description: {
-    fontSize: 14,
-  },
-  price: {
-    marginTop: 4,
+  footerTitle: {
     fontSize: 18,
     fontWeight: "700",
+    marginBottom: 12,
   },
-  cta: {
-    marginTop: 12,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-    elevation: 2,
+  footerText: {
+    fontSize: 14,
+    lineHeight: 20,
   },
-  ctaText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  redeemedText: {
-    fontSize: 12,
-    fontWeight: "bold",
+  wheelSection: {
+    marginBottom: 24,
+    paddingVertical: 16,
+    backgroundColor: 'rgba(112, 53, 55, 0.05)',
+    borderRadius: 20,
+    alignItems: 'center',
+    overflow: 'hidden',
   },
 });
