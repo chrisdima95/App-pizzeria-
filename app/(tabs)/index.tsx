@@ -4,19 +4,20 @@ import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Colors } from "@/constants/theme";
 import { useOrder } from "@/contexts/OrderContext";
+import pizzasData from "@/data/pizzas.json";
 import { useTransitionAnimations } from "@/hooks/use-transition-animations";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  FlatList,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-  useColorScheme,
-  View,
+    FlatList,
+    Image,
+    Platform,
+    StyleSheet,
+    TouchableOpacity,
+    useColorScheme,
+    View,
 } from "react-native";
 import Animated from "react-native-reanimated";
-import pizzasData from "@/data/pizzas.json";
 
 interface Pizza {
   id: string;
@@ -290,7 +291,11 @@ export default function HomeScreen() {
               styles.categoryButton,
               {
                 backgroundColor:
-                  selectedCategory === category.key ? colors.primary : "white",
+                  selectedCategory === category.key 
+                    ? colors.primary 
+                    : colorScheme === "dark" 
+                      ? colors.background 
+                      : "white",
                 borderColor:
                   selectedCategory === category.key
                     ? colors.primary
@@ -304,7 +309,11 @@ export default function HomeScreen() {
                 styles.categoryLabel,
                 {
                   color:
-                    selectedCategory === category.key ? "white" : colors.text,
+                    selectedCategory === category.key 
+                      ? "white" 
+                      : colorScheme === "dark" 
+                        ? colors.text 
+                        : colors.text,
                   fontWeight: selectedCategory === category.key ? "600" : "400",
                 },
               ]}
@@ -356,7 +365,9 @@ const styles = StyleSheet.create({
   },
   pizzasList: {
     padding: 20,
-    marginTop: -14,
+    // Su iOS i margini negativi causano che la prima card venga tagliata sotto i pulsanti
+    // Evitiamo il marginTop negativo solo su iOS
+    marginTop: Platform.OS === "ios" ? 0 : -14,
   },
   pizzaCard: {
     borderRadius: 16,
@@ -365,7 +376,8 @@ const styles = StyleSheet.create({
     boxShadow: "0px 4px 8px rgba(229, 62, 62, 0.1)",
     elevation: 4,
     borderWidth: 1,
-    marginTop: -5,
+    // Evitiamo l'offset negativo della prima card su iOS
+    marginTop: Platform.OS === "ios" ? 0 : -5,
   },
   pizzaMainContent: {
     flexDirection: "row",
@@ -408,7 +420,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginHorizontal: 20,
     marginBottom: 20,
-    backgroundColor: "#ffeec9",
     borderRadius: 16,
   },
   categoryButton: {
