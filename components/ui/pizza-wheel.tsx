@@ -1,15 +1,16 @@
 import { ThemedText } from "@/components/themed-text";
 import { Colors } from "@/constants/theme";
 import { usePizzaModal } from "@/hooks/use-pizza-modal";
-import React, { useEffect, useRef, useState } from "react";
+import { useWheelCooldown } from "@/hooks/use-wheel-cooldown";
+import React, { useRef, useState } from "react";
 import {
-  Animated,
-  Dimensions,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-  useColorScheme,
-  View,
+    Animated,
+    Dimensions,
+    Image,
+    StyleSheet,
+    TouchableOpacity,
+    useColorScheme,
+    View,
 } from "react-native";
 import { Offer } from "./offer-carousel";
 
@@ -32,6 +33,7 @@ export function PizzaWheel({
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
   const { showModal, ModalComponent } = usePizzaModal();
+  const { handleSpinAttempt, CooldownElement } = useWheelCooldown();
 
   const [isSpinning, setIsSpinning] = useState(false);
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
@@ -42,6 +44,11 @@ export function PizzaWheel({
 
   const spinWheel = () => {
     if (isSpinning || disabled) return;
+
+    // Controlla il cooldown prima di permettere la rotazione
+    if (!handleSpinAttempt()) {
+      return;
+    }
 
     setIsSpinning(true);
     setShowResult(false);
@@ -118,16 +125,7 @@ export function PizzaWheel({
     ]);
   };
 
-  const resetWheel = () => {
-    setShowResult(false);
-    setSelectedOffer(null);
-    // Reset smooth per evitare salti
-    Animated.timing(spinValue, {
-      toValue: 0,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
-  };
+  // Rimosso il pulsante "Gira di nuovo": il reset manuale non è più previsto
 
   const spinInterpolate = spinValue.interpolate({
     inputRange: [0, 360],
@@ -136,17 +134,6 @@ export function PizzaWheel({
 
   return (
     <View style={styles.container}>
-      <ThemedText
-        type="title"
-        style={[styles.title, { color: colors.primary }]}
-      >
-        🍕 Ruota della Fortuna Pizza
-      </ThemedText>
-
-      <ThemedText style={[styles.subtitle, { color: colors.muted }]}>
-        Gira la ruota e vinci un'offerta speciale!
-      </ThemedText>
-
       <View style={styles.wheelContainer}>
         {/* Freccia indicatrice in alto */}
         <View style={[styles.arrow, { borderBottomColor: colors.primary }]} />
@@ -158,18 +145,12 @@ export function PizzaWheel({
           }}
         >
           <Image
-            source={require("@/assets/images/ruota.png")}
+            source={require("@/assets/images/Ruota.png")}
             style={styles.wheelImage}
             resizeMode="contain"
           />
         </Animated.View>
 
-        {/* Indicatore centrale */}
-        <View
-          style={[styles.centerIndicator, { backgroundColor: colors.primary }]}
-        >
-          <ThemedText style={styles.centerText}>🍕</ThemedText>
-        </View>
       </View>
 
       {/* Pulsante per girare */}
@@ -214,21 +195,14 @@ export function PizzaWheel({
           <ThemedText style={[styles.resultPrice, { color: colors.primary }]}>
             €{selectedOffer.price.toFixed(2)}
           </ThemedText>
-          <TouchableOpacity
-            style={[styles.resetButton, { backgroundColor: colors.border }]}
-            onPress={resetWheel}
-          >
-            <ThemedText
-              style={[styles.resetButtonText, { color: colors.text }]}
-            >
-              Gira di nuovo
-            </ThemedText>
-          </TouchableOpacity>
         </View>
       )}
 
       {/* Modal personalizzato */}
       <ModalComponent />
+      
+      {/* Modal cooldown (stabile) */}
+      {CooldownElement}
     </View>
   );
 }
@@ -239,46 +213,17 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 16,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "800",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  subtitle: {
-    fontSize: 16,
-    fontWeight: "500",
-    marginBottom: -40, // Ridotto da 24 a 8
-    textAlign: "center",
-  },
   wheelContainer: {
     position: "relative",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: -50,
-    marginTop: 8, // Aggiunto margine superiore per controllo
+    marginTop: 20, // Aggiustato margine superiore dopo rimozione titolo
   },
   wheelImage: {
     width: WHEEL_SIZE,
     height: WHEEL_SIZE,
     borderRadius: WHEEL_SIZE / 2,
-  },
-  centerIndicator: {
-    position: "absolute",
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#703537",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-    zIndex: 8,
-  },
-  centerText: {
-    fontSize: 24,
   },
   arrow: {
     position: "absolute",
@@ -331,14 +276,5 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "800",
     marginBottom: 16,
-  },
-  resetButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-  resetButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
   },
 });

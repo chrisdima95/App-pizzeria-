@@ -3,7 +3,6 @@ import { ThemedText } from "@/components/themed-text";
 import { PizzaWheel, type Offer } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
-import { useOrder } from "@/contexts/OrderContext";
 import { getAllOffers } from "@/data/offers";
 import { usePizzaModal } from "@/hooks/use-pizza-modal";
 import { useRouter } from "expo-router";
@@ -14,13 +13,14 @@ import {
   useColorScheme,
   View
 } from "react-native";
+import { useOrder } from "../../contexts/OrderContext";
 
 export default function OfferteScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
 
   const router = useRouter();
-  const { addToOrder, redeemedOffers } = useOrder();
+  const { addToOrder, redeemedOffers, orders } = useOrder();
   const { isAuthenticated } = useAuth();
   const { showModal, ModalComponent } = usePizzaModal();
 
@@ -36,6 +36,17 @@ export default function OfferteScreen() {
             onPress: () => router.push("/login?mode=register"),
           },
         ]
+      );
+      return;
+    }
+
+    // Se nel carrello c'è già un'offerta, impedisci di aggiungerne un'altra
+    const offerIdSet = new Set(getAllOffers().map(o => o.id));
+    const hasOfferInCart = orders.some(o => offerIdSet.has(o.id));
+    if (hasOfferInCart) {
+      showModal(
+        "Offerta già nel carrello",
+        "Puoi riscattare una sola offerta alla volta. Conferma l'ordine per poter rigirare la ruota.",
       );
       return;
     }

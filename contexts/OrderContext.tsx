@@ -1,10 +1,11 @@
+import { getAllOffers } from "@/data/offers";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
+    createContext,
+    ReactNode,
+    useContext,
+    useEffect,
+    useState,
 } from "react";
 import { useAuth } from "./AuthContext";
 
@@ -20,8 +21,10 @@ export interface OrderItem {
 
 interface OrderContextType {
   orders: OrderItem[];
-  completedOrders: OrderItem[][]; // listaรักษ์ ordini confermati (ogni elemento è uno "snapshot" del carrello)
+  completedOrders: OrderItem[][]; // lista degli ordini confermati (ogni elemento è uno "snapshot" del carrello)
   redeemedOffers: string[]; // lista degli ID delle offerte riscattate
+  lastWheelSpinTimestamp: number | null; // timestamp dell'ultimo utilizzo della ruota
+  hasOfferInCart: boolean; // true se il carrello contiene già un'offerta dalla ruota
   setOrders: React.Dispatch<React.SetStateAction<OrderItem[]>>; // per gestione diretta degli ordini
   addToOrder: (item: Omit<OrderItem, "status">) => void; // non serve specificare lo status quando si aggiunge
   updateQuantity: (id: string, quantity: number) => void; // aggiorna la quantità di un ordine
@@ -36,13 +39,17 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
   const [orders, setOrders] = useState<OrderItem[]>([]);
   const [completedOrders, setCompletedOrders] = useState<OrderItem[][]>([]);
   const [redeemedOffers, setRedeemedOffers] = useState<string[]>([]);
+  const [lastWheelSpinTimestamp, setLastWheelSpinTimestamp] = useState<number | null>(null);
   const { user, isAuthenticated } = useAuth();
+  // Insieme degli ID di tutte le offerte disponibili (ruota)
+  const offerIdSet = new Set<string>(getAllOffers().map((o) => o.id));
 
   // Funzione per ottenere le chiavi specifiche per l'utente
   const getUserStorageKeys = (userId: string) => ({
     orders: `orders_${userId}`,
     ordersHistory: `ordersHistory_${userId}`,
     redeemedOffers: `redeemedOffers_${userId}`,
+    lastWheelSpinTimestamp: `lastWheelSpin_${userId}`,
   });
 
   // Carica ordini e storico all'avvio o quando cambia l'utente
@@ -53,6 +60,7 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
         setOrders([]);
         setCompletedOrders([]);
         setRedeemedOffers([]);
+        setLastWheelSpinTimestamp(null);
         return;
       }
 
@@ -61,11 +69,13 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
           orders: ordersKey,
           ordersHistory: historyKey,
           redeemedOffers: offersKey,
+          lastWheelSpinTimestamp: wheelKey,
         } = getUserStorageKeys(user.id);
-        const [ordersJson, historyJson, offersJson] = await Promise.all([
+        const [ordersJson, historyJson, offersJson, wheelJson] = await Promise.all([
           AsyncStorage.getItem(ordersKey),
           AsyncStorage.getItem(historyKey),
           AsyncStorage.getItem(offersKey),
+          AsyncStorage.getItem(wheelKey),
         ]);
 
         if (ordersJson) {
@@ -94,11 +104,21 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
         } else {
           setRedeemedOffers([]);
         }
+
+        if (wheelJson) {
+          const parsedTimestamp = Number(wheelJson);
+          if (!isNaN(parsedTimestamp)) {
+            setLastWheelSpinTimestamp(parsedTimestamp);
+          }
+        } else {
+          setLastWheelSpinTimestamp(null);
+        }
       } catch (e) {
         console.error("Errore nel caricamento ordini da AsyncStorage", e);
         setOrders([]);
         setCompletedOrders([]);
         setRedeemedOffers([]);
+        setLastWheelSpinTimestamp(null);
       }
     };
     loadPersistedOrders();
@@ -155,6 +175,28 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
     persistRedeemedOffers();
   }, [redeemedOffers, user, isAuthenticated]);
 
+  // Salva timestamp ultimo utilizzo ruota su storage a ogni modifica
+  useEffect(() => {
+    const persistWheelTimestamp = async () => {
+      if (!isAuthenticated || !user) return;
+
+      try {
+        const { lastWheelSpinTimestamp: wheelKey } = getUserStorageKeys(user.id);
+        if (lastWheelSpinTimestamp !== null) {
+          await AsyncStorage.setItem(wheelKey, lastWheelSpinTimestamp.toString());
+        } else {
+          await AsyncStorage.removeItem(wheelKey);
+        }
+      } catch (e) {
+        console.error(
+          "Errore nel salvataggio timestamp ruota su AsyncStorage",
+          e
+        );
+      }
+    };
+    persistWheelTimestamp();
+  }, [lastWheelSpinTimestamp, user, isAuthenticated]);
+
   const addToOrder = (item: Omit<OrderItem, "status">) => {
     setOrders((prev) => {
       const existing = prev.find((o) => o.id === item.id);
@@ -190,15 +232,18 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
     if (!orders.length) return;
 
     // Identifica le offerte nell'ordine corrente
-    const offerIds = ["o1", "o2", "o3", "o4"]; // ID delle offerte disponibili
-    const offersInOrder = orders.filter((order) => offerIds.includes(order.id));
+    const offersInOrder = orders.filter((order) => offerIdSet.has(order.id));
 
-    // Aggiunge le offerte riscattate alla lista
+    // Aggiunge le offerte riscattate alla lista e attiva il cooldown della ruota
     if (offersInOrder.length > 0) {
       const newRedeemedOffers = offersInOrder.map((offer) => offer.id);
       setRedeemedOffers((prev) => [
         ...new Set([...prev, ...newRedeemedOffers]),
       ]);
+      
+      // IMPORTANTE: Attiva il cooldown della ruota SOLO quando l'ordine viene confermato
+      // Questo impedisce di rigirare la ruota dopo aver riscattato un'offerta
+      setLastWheelSpinTimestamp(Date.now());
     }
 
     // aggiunge lo snapshot corrente degli ordini nello storico
@@ -213,6 +258,8 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
         orders,
         completedOrders,
         redeemedOffers,
+        lastWheelSpinTimestamp,
+        hasOfferInCart: orders.some((o) => offerIdSet.has(o.id)),
         setOrders,
         addToOrder,
         updateQuantity,

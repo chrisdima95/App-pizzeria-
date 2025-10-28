@@ -7,7 +7,7 @@ import Animated, { AnimatedStyle } from 'react-native-reanimated';
 interface AnimatedThemedViewProps {
   style?: AnimatedStyle<ViewStyle> | ViewStyle;
   children?: React.ReactNode;
-  [key: string]: any;
+  [key: string]: any; 
 }
 
 export const AnimatedThemedView: React.FC<AnimatedThemedViewProps> = ({ 
