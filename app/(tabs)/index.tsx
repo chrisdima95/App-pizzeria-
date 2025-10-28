@@ -184,6 +184,7 @@ export default function HomeScreen() {
             )}
           </View>
           <View style={styles.pizzaInfo}>
+            {/* Titolo su riga intera */}
             <ThemedText
               type="subtitle"
               style={styles.pizzaName}
@@ -195,62 +196,75 @@ export default function HomeScreen() {
             >
               {item.name}
             </ThemedText>
-            <ThemedText style={[styles.pizzaPrice, { color: colors.error }]}>
-              €{item.price}
-            </ThemedText>
-          </View>
 
-          {/* Controlli di quantità */}
-          <View style={styles.quantityControls}>
-            {quantity === 0 ? (
-              <TouchableOpacity
-                style={[styles.addButton, { backgroundColor: colors.primary }]}
-                onPress={() => handleAddPizza(item)}
-              >
-                <ThemedText style={styles.addButtonText}>+ Aggiungi</ThemedText>
-              </TouchableOpacity>
-            ) : (
-              <View style={styles.quantityRow}>
-                <TouchableOpacity
-                  style={[
-                    styles.quantityButton,
-                    {
-                      backgroundColor: colors.background,
-                      borderColor: colors.border,
-                    },
-                  ]}
-                  onPress={() => handleUpdateQuantity(item.id, quantity - 1)}
-                >
-                  <IconSymbol size={16} name="minus" color={colors.text} />
-                </TouchableOpacity>
+            {/* Prezzo e controlli quantità sotto */}
+            <View style={styles.priceAndControls}>
+              <ThemedText style={[styles.pizzaPrice, { color: colors.error }]}>
+                €{item.price}
+              </ThemedText>
 
-                <View
-                  style={[
-                    styles.quantityDisplay,
-                    {
-                      backgroundColor: colors.background,
-                      borderColor: colors.border,
-                    },
-                  ]}
-                >
-                  <ThemedText
-                    style={[styles.quantityText, { color: colors.text }]}
+              {/* Controlli di quantità */}
+              <View style={styles.quantityControls}>
+                {quantity === 0 ? (
+                  <TouchableOpacity
+                    style={[
+                      styles.addButton,
+                      { backgroundColor: colors.primary },
+                    ]}
+                    onPress={() => handleAddPizza(item)}
                   >
-                    {quantity}
-                  </ThemedText>
-                </View>
+                    <ThemedText style={styles.addButtonText}>
+                      + Aggiungi
+                    </ThemedText>
+                  </TouchableOpacity>
+                ) : (
+                  <View style={styles.quantityRow}>
+                    <TouchableOpacity
+                      style={[
+                        styles.quantityButton,
+                        {
+                          backgroundColor: colors.primary,
+                          borderColor: colors.border,
+                        },
+                      ]}
+                      onPress={() =>
+                        handleUpdateQuantity(item.id, quantity - 1)
+                      }
+                    >
+                      <IconSymbol size={16} name="minus" color="white" />
+                    </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={[
-                    styles.quantityButton,
-                    { backgroundColor: "darkgreen" },
-                  ]}
-                  onPress={() => handleUpdateQuantity(item.id, quantity + 1)}
-                >
-                  <IconSymbol size={16} name="plus" color="white" />
-                </TouchableOpacity>
+                    <View
+                      style={[
+                        styles.quantityDisplay,
+                        {
+                          backgroundColor: colors.background,
+                          borderColor: colors.border,
+                        },
+                      ]}
+                    >
+                      <ThemedText
+                        style={[styles.quantityText, { color: colors.text }]}
+                      >
+                        {quantity}
+                      </ThemedText>
+                    </View>
+
+                    <TouchableOpacity
+                      style={[
+                        styles.quantityButton,
+                        { backgroundColor: "darkgreen" },
+                      ]}
+                      onPress={() =>
+                        handleUpdateQuantity(item.id, quantity + 1)
+                      }
+                    >
+                      <IconSymbol size={16} name="plus" color="white" />
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
-            )}
+            </View>
           </View>
         </TouchableOpacity>
       </Animated.View>
@@ -412,19 +426,27 @@ const styles = StyleSheet.create({
     fontSize: 16.9,
     textAlign: "center",
   },
+  priceAndControls: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: -15,
+  },
   quantityControls: {
-    marginTop: 12,
     alignItems: "flex-end",
   },
   addButton: {
-    paddingVertical: 8,
+    height: 32,
+    paddingVertical: 0,
     paddingHorizontal: 16,
-    borderRadius: 20,
+    borderRadius: 16,
     elevation: 2,
     shadowColor: "#E53E3E",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
+    justifyContent: "center",
+    alignItems: "center",
   },
   addButtonText: {
     color: "white",

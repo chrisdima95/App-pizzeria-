@@ -236,14 +236,17 @@ export default function PizzaDetailsScreen() {
           </ThemedText>
           <View style={styles.quantityControls}>
             <TouchableOpacity
-              style={[styles.quantityButton, { backgroundColor: "#ffeec9" }]}
+              style={[
+                styles.quantityButton,
+                { backgroundColor: colors.secondary },
+              ]}
               onPress={() => {
                 const newQuantity = quantity - 1;
                 setLocalQuantity(newQuantity);
               }}
               disabled={quantity <= 1}
             >
-              <IconSymbol size={20} name="minus" color={colors.text} />
+              <IconSymbol size={20} name="minus" color="white" />
             </TouchableOpacity>
 
             <View
@@ -325,8 +328,13 @@ export default function PizzaDetailsScreen() {
                   <Switch
                     value={customization.selected}
                     onValueChange={() => toggleCustomization(customization.id)}
-                    trackColor={{ false: colors.border, true: colors.primary }}
-                    thumbColor={customization.selected ? "white" : colors.muted}
+                    trackColor={{
+                      false: colors.primary,
+                      true: colors.secondary,
+                    }}
+                    thumbColor={
+                      customization.selected ? "colors.secondary" : colors.muted
+                    }
                   />
                 </TouchableOpacity>
               ))}

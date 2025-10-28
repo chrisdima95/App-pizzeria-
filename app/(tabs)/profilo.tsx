@@ -8,6 +8,7 @@ import { useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
+import { usePizzaModal } from "@/hooks/use-pizza-modal";
 import {
   ActionSheetIOS,
   Alert,
@@ -49,6 +50,7 @@ export default function ProfiloScreen() {
   const { user, logout, updateUser, isAuthenticated } = useAuth();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
+  const { showModal, ModalComponent } = usePizzaModal();
   const cardBg = colors.card;
   const divider = colors.border;
   const logoutBg = colorScheme === "dark" ? colors.border : colors.background;
@@ -214,18 +216,7 @@ export default function ProfiloScreen() {
   }, [user]);
 
   const handleLogout = () => {
-    if (Platform.OS === "web") {
-      const confirmed =
-        typeof window !== "undefined"
-          ? window.confirm("Sei sicuro di voler uscire?")
-          : true;
-      if (confirmed) {
-        logout();
-      }
-      return;
-    }
-
-    Alert.alert("Logout", "Sei sicuro di voler uscire?", [
+    showModal("Logout", "Sei sicuro di voler uscire?", [
       { text: "Annulla", style: "cancel" },
       { text: "Esci", style: "destructive", onPress: logout },
     ]);
@@ -240,7 +231,11 @@ export default function ProfiloScreen() {
       // Salva i dati
       updateUser(personalData);
       setIsEditing(false);
-      Alert.alert("Successo", "Dati personali aggiornati!");
+      showModal(
+        "Profilo aggiornato",
+        "Le tue informazioni personali sono state salvate.",
+        [{ text: "OK" }]
+      );
     } else {
       setIsEditing(true);
     }
@@ -261,6 +256,65 @@ export default function ProfiloScreen() {
       ...prev,
       [field]: value,
     }));
+  };
+
+  const formatBirthDate = (text: string) => {
+    // Rimuovi tutti i caratteri non numerici
+    const numbersOnly = text.replace(/[^0-9]/g, "");
+
+    // Limita a 8 cifre (GGMMAAAA)
+    const limited = numbersOnly.slice(0, 8);
+
+    // Validazione per giorni, mesi e anni
+    if (limited.length >= 2) {
+      const day = parseInt(limited.slice(0, 2));
+      if (day > 31 || day < 1) {
+        return limited.slice(0, 1); // Permetti solo la prima cifra valida
+      }
+    }
+
+    if (limited.length >= 4) {
+      const month = parseInt(limited.slice(2, 4));
+      if (month > 12 || month < 1) {
+        return limited.slice(0, 3); // Ferma alla terza cifra se mese invalido
+      }
+    }
+
+    if (limited.length >= 8) {
+      const year = parseInt(limited.slice(4, 8));
+      const currentYear = new Date().getFullYear();
+      if (year < 1900 || year > currentYear) {
+        return limited.slice(0, 7); // Ferma alla settima cifra se anno invalido
+      }
+    }
+
+    // Validazione giorni per mese specifico (quando abbiamo giorno, mese e anno completi)
+    if (limited.length >= 8) {
+      const day = parseInt(limited.slice(0, 2));
+      const month = parseInt(limited.slice(2, 4));
+      const year = parseInt(limited.slice(4, 8));
+
+      const daysInMonth = new Date(year, month, 0).getDate();
+      if (day > daysInMonth) {
+        return limited.slice(0, 7); // Ferma alla settima cifra se giorno invalido per quel mese
+      }
+    }
+
+    // Aggiungi gli slash automaticamente
+    if (limited.length <= 2) {
+      return limited;
+    } else if (limited.length <= 4) {
+      return `${limited.slice(0, 2)}/${limited.slice(2)}`;
+    } else {
+      return `${limited.slice(0, 2)}/${limited.slice(2, 4)}/${limited.slice(
+        4
+      )}`;
+    }
+  };
+
+  const handleBirthDateChange = (value: string) => {
+    const formatted = formatBirthDate(value);
+    handleInputChange("birthDate", formatted);
   };
 
   const menuItems = [
@@ -484,11 +538,11 @@ export default function ProfiloScreen() {
                       },
                     ]}
                     value={personalData.birthDate}
-                    onChangeText={(value) =>
-                      handleInputChange("birthDate", value)
-                    }
+                    onChangeText={handleBirthDateChange}
                     placeholder="GG/MM/AAAA"
                     placeholderTextColor={colors.muted}
+                    keyboardType="numeric"
+                    maxLength={10}
                   />
                 ) : (
                   <ThemedText
@@ -536,7 +590,7 @@ export default function ProfiloScreen() {
                 styles.logoutButton,
                 {
                   pointerEvents: "auto",
-                  backgroundColor: logoutBg,
+                  backgroundColor: "white",
                   borderColor: logoutBorder,
                 },
               ]}
@@ -651,6 +705,7 @@ export default function ProfiloScreen() {
           </View>
         </View>
       </Modal>
+      <ModalComponent />
     </ScrollView>
   );
 }
@@ -819,7 +874,11 @@ const styles = StyleSheet.create({
     padding: 18,
     borderWidth: 1,
     gap: 10,
-    elevation: 2,
+    elevation: 4,
+    shadowColor: "#E53E3E",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   logoutText: {
     fontSize: 16,
