@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { router } from "expo-router";
 import React, { useEffect } from "react";
-import { ActivityIndicator, Image, StyleSheet } from "react-native";
+import { ActivityIndicator, Image, Platform, StyleSheet } from "react-native";
 
 export default function WelcomeScreen() {
   const { isLoading } = useAuth();
@@ -65,11 +65,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+    // Su iOS aggiungiamo padding top per evitare il taglio del testo
+    paddingTop: Platform.OS === "ios" ? 60 : 20,
   },
   logoFrame: {
-    width: 320,
-    height: 320,
-    marginBottom: -20,
+    // Riduciamo le dimensioni del logo su iOS per evitare sovrapposizioni
+    width: Platform.OS === "ios" ? 280 : 320,
+    height: Platform.OS === "ios" ? 280 : 320,
+    marginBottom: Platform.OS === "ios" ? 0 : -20,
     backgroundColor: "#ffeec9",
   },
   logo: {
@@ -77,7 +80,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   welcomeText: {
-    fontSize: 36,
+    fontSize: Platform.OS === "ios" ? 32 : 36,
     fontWeight: "bold",
     marginBottom: 12,
     textAlign: "center",
