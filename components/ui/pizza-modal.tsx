@@ -9,6 +9,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  Image,
 } from "react-native";
 
 export interface PizzaModalButton {
@@ -133,24 +134,29 @@ export const PizzaModal: React.FC<PizzaModalProps> = ({
                 },
               ]}
             >
-              {/* Titolo */}
-              <View style={styles.header}>
-                <ThemedText
-                  type="title"
-                  style={[styles.title, { color: colors.text }]}
-                >
-                  {title}
-                </ThemedText>
-              </View>
-
-              {/* Messaggio */}
-              {message && (
-                <View style={styles.messageContainer}>
-                  <ThemedText style={[styles.message, { color: colors.text }]}>
-                    {message}
+              {/* Header con mascotte a sinistra e testi a destra */}
+              <View style={styles.headerRow}>
+                <Image
+                  source={require("@/assets/images/MascotteLogo.png")}
+                  style={styles.mascotte}
+                  resizeMode="contain"
+                />
+                <View style={styles.headerTextContainer}>
+                  <ThemedText
+                    type="title"
+                    style={[styles.title, { color: colors.text }]}
+                  >
+                    {title}
                   </ThemedText>
+                  {message && (
+                    <ThemedText
+                      style={[styles.message, { color: colors.text }]}
+                    >
+                      {message}
+                    </ThemedText>
+                  )}
                 </View>
-              )}
+              </View>
 
               {/* Pulsanti */}
               <View style={styles.buttonsContainer}>
@@ -211,19 +217,32 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 16,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  messageContainer: {
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 24,
-    paddingBottom: 24,
+    paddingTop: 24,
+    paddingBottom: 8,
+    gap: 12,
+  },
+  mascotte: {
+    width: 56,
+    height: 56,
+  },
+  headerTextContainer: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "left",
   },
   message: {
-    fontSize: 16,
-    textAlign: "center",
-    lineHeight: 24,
+    fontSize: 14,
+    textAlign: "left",
+    lineHeight: 20,
+    marginTop: 4,
+    paddingRight: 8,
   },
   buttonsContainer: {
     flexDirection: "row",
