@@ -8,63 +8,26 @@ import { useOrder } from "@/contexts/OrderContext";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
-    FlatList,
-    StyleSheet,
-    TouchableOpacity,
-    useColorScheme,
-    View,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+  View,
 } from "react-native";
 
 interface OrderGroup {
   id: string;
-  orders: Array<{
+  orders: {
     id: string;
     name: string;
     price: number;
     quantity: number;
     status: "pending" | "confirmed" | "preparing" | "ready" | "delivered";
-  }>;
+  }[];
   date: string;
   total: number;
 }
 
-const getStatusText = (
-  status: "pending" | "confirmed" | "preparing" | "ready" | "delivered"
-) => {
-  switch (status) {
-    case "pending":
-      return "In attesa";
-    case "confirmed":
-      return "Confermato";
-    case "preparing":
-      return "In preparazione";
-    case "ready":
-      return "Pronto";
-    case "delivered":
-      return "Consegnato";
-    default:
-      return "Sconosciuto";
-  }
-};
-
-const getStatusColor = (
-  status: "pending" | "confirmed" | "preparing" | "ready" | "delivered"
-) => {
-  switch (status) {
-    case "pending":
-      return "#FF9500";
-    case "confirmed":
-      return "#007AFF";
-    case "preparing":
-      return "#FF3B30";
-    case "ready":
-      return "#34C759";
-    case "delivered":
-      return "#8E8E93";
-    default:
-      return "#8E8E93";
-  }
-};
 
 export default function OrdiniScreen() {
   const router = useRouter();
@@ -72,7 +35,6 @@ export default function OrdiniScreen() {
   const colors = Colors[colorScheme ?? "light"];
   const { user, isAuthenticated } = useAuth();
   const { completedOrders } = useOrder();
-  const isDark = colorScheme === "dark";
 
   // Trasforma completedOrders in OrderGroup per la visualizzazione
   const orderGroups: OrderGroup[] = completedOrders.map((orderGroup, index) => {
@@ -232,6 +194,11 @@ export default function OrdiniScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
   },
   newOrderContainer: {
     paddingHorizontal: 20,

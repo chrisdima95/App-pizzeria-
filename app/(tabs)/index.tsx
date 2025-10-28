@@ -224,7 +224,7 @@ export default function HomeScreen() {
                       style={[
                         styles.quantityButton,
                         {
-                          backgroundColor: colors.primary,
+                          backgroundColor: colors.secondary,
                           borderColor: colors.border,
                         },
                       ]}

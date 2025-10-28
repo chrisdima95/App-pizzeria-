@@ -13,4 +13,5 @@ export { PizzaWheel } from "./pizza-wheel";
 // Re-export dei componenti esistenti
 export { Collapsible } from "./collapsible";
 export { IconSymbol } from "./icon-symbol";
+export { MascotteIcon } from "./mascotte-icon";
 

@@ -11,8 +11,7 @@ export default function ModificaProfiloScreen() {
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
       if (!modificato) return;
 
-      // Blocca l’evento di uscita
-      e.preventDefault();
+      // Blocca l'evento di uscita
 
       Alert.alert(
         'Modifiche non salvate',

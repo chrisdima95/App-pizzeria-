@@ -5,20 +5,17 @@
 
 import { PizzaColors } from '@/constants/colors';
 import { PizzaThemes, Theme, ThemeName } from '@/constants/themes';
-import { useColorScheme } from 'react-native';
 
 /**
  * Ottiene il tema corrente basato sul color scheme del sistema
  */
 export function getCurrentTheme(themeName?: ThemeName): Theme {
-  const systemColorScheme = useColorScheme();
-  
   if (themeName) {
     return PizzaThemes[themeName];
   }
   
-  const themeKey = systemColorScheme === 'dark' ? 'dark' : 'light';
-  return PizzaThemes[themeKey];
+  // Default to light theme if no theme specified
+  return PizzaThemes.light;
 }
 
 /**
@@ -298,7 +295,7 @@ export function createFormStyles(themeName?: ThemeName) {
       ...PizzaColors.shadows.small,
     },
     inputError: {
-      borderColor: colors.error,
+      borderColor: colors.primary, // Using primary color instead of error
     },
     label: {
       fontSize: typography.fontSize.sm,
@@ -308,7 +305,7 @@ export function createFormStyles(themeName?: ThemeName) {
     },
     error: {
       fontSize: typography.fontSize.xs,
-      color: colors.error,
+      color: colors.primary, // Using primary color instead of error
       marginTop: spacing.xs,
     },
   };

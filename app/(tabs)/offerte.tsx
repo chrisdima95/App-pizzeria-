@@ -1,6 +1,7 @@
 import { TabHeader } from "@/components/TabHeader";
 import { ThemedText } from "@/components/themed-text";
-import { PizzaWheel, type Offer } from "@/components/ui";
+import { PizzaWheel } from "@/components/ui";
+import { type Offer } from "@/components/ui/offer-carousel";
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { getAllOffers } from "@/data/offers";
@@ -73,21 +74,29 @@ export default function OfferteScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <TabHeader title="Offerte Speciali" showMascotte={false} />
+      <TabHeader title="Offerte Esclusive" showMascotte={false} />
       
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        bounces={true}
+        alwaysBounceVertical={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <ThemedText type="title" style={styles.mainTitle}>
-            Ruota della Fortuna Pizza
+        {/* Hero Section */}
+        <View style={[styles.heroSection, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <ThemedText type="title" style={styles.heroTitle}>
+            La tua fortuna ti aspetta
           </ThemedText>
-          <ThemedText style={[styles.subtitle, { color: colors.muted }]}>
-            Gira la ruota e vinci un'offerta speciale!
+          <ThemedText style={[styles.heroSubtitle, { color: colors.muted }]}>
+            Un giro di ruota e potresti vincere un&apos;offerta incredibile
           </ThemedText>
+          <View style={[styles.highlightBox, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '30' }]}>
+            <ThemedText style={[styles.highlightText, { color: colors.primary }]}>
+              Ogni offerta può essere riscattata una sola volta
+            </ThemedText>
+          </View>
         </View>
 
         {/* Ruota della fortuna */}
@@ -99,17 +108,27 @@ export default function OfferteScreen() {
           />
         </View>
 
+        {/* Call to Action */}
+        <View style={[styles.ctaSection, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <ThemedText style={[styles.ctaTitle, { color: colors.primary }]}>
+            Pronto a vincere?
+          </ThemedText>
+          <ThemedText style={[styles.ctaText, { color: colors.muted }]}>
+            Swipa sulla ruota o premi il pulsante per iniziare il gioco. La fortuna è dalla tua parte!
+          </ThemedText>
+        </View>
+
         {/* Footer con informazioni */}
         <View style={[styles.footer, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <ThemedText style={[styles.footerTitle, { color: colors.primary }]}>
-            Come Funziona la Ruota
+            Come Funziona
           </ThemedText>
           <ThemedText style={[styles.footerText, { color: colors.muted }]}>
-            • Swipa sulla ruota o premi "Gira la Ruota!" per iniziare{'\n'}
-            • La ruota gira velocemente per almeno 2 secondi{'\n'}
+            • Swipa sulla ruota o premi &quot;Gira la ruota!&quot; per iniziare{'\n'}
+            • La ruota gira per esattamente 5 secondi{'\n'}
             • Ogni offerta può essere riscattata una sola volta{'\n'}
             • Registrati per riscattare le offerte vinte{'\n'}
-            • Buona fortuna! 🍕
+            • Buona fortuna!
           </ThemedText>
         </View>
       </ScrollView>
@@ -130,23 +149,92 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 32,
   },
-  header: {
+  heroSection: {
+    marginTop: 16,
     marginBottom: 24,
-    paddingTop: 8,
+    padding: 24,
+    borderRadius: 20,
+    borderWidth: 1,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  mainTitle: {
-    fontSize: 28,
+  heroTitle: {
+    fontSize: 26,
+    fontWeight: "800",
+    marginBottom: 12,
+    textAlign: "center",
+    letterSpacing: -0.5,
+  },
+  heroSubtitle: {
+    fontSize: 16,
+    textAlign: "center",
+    lineHeight: 24,
+    marginBottom: 16,
+    fontWeight: "500",
+  },
+  highlightBox: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  highlightText: {
+    fontSize: 14,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  wheelSection: {
+    marginBottom: 20,
+    paddingVertical: 20,
+    backgroundColor: 'rgba(112, 53, 55, 0.08)',
+    borderRadius: 24,
+    alignItems: 'center',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  ctaSection: {
+    marginBottom: 20,
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  ctaTitle: {
+    fontSize: 20,
     fontWeight: "700",
     marginBottom: 8,
     textAlign: "center",
   },
-  subtitle: {
-    fontSize: 16,
+  ctaText: {
+    fontSize: 15,
     textAlign: "center",
     lineHeight: 22,
+    fontWeight: "500",
   },
   footer: {
-    marginTop: 24,
     padding: 20,
     borderRadius: 16,
     borderWidth: 1,
@@ -158,14 +246,6 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    lineHeight: 20,
-  },
-  wheelSection: {
-    marginBottom: 24,
-    paddingVertical: 16,
-    backgroundColor: 'rgba(112, 53, 55, 0.05)',
-    borderRadius: 20,
-    alignItems: 'center',
-    overflow: 'hidden',
+    lineHeight: 22,
   },
 });

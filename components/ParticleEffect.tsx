@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
 import { Dimensions, View } from 'react-native';
 import Animated, {
-    Easing,
-    useAnimatedStyle,
-    useSharedValue,
-    withDelay,
-    withRepeat,
-    withSequence,
-    withSpring,
-    withTiming
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withSpring,
+  withTiming
 } from 'react-native-reanimated';
 
 interface ParticleEffectProps {
@@ -109,11 +109,11 @@ const Particle: React.FC<{
     transform: [
       { scale: scale.value },
       { rotate: `${rotation.value}deg` }
-    ],
+    ] as any,
   }));
 
   return (
-    <Animated.View style={animatedStyle}>
+    <Animated.View style={animatedStyle as any}>
       <View
         style={{
           width: 8,
@@ -130,6 +130,8 @@ const Particle: React.FC<{
     </Animated.View>
   );
 });
+
+Particle.displayName = 'Particle';
 
 export const ParticleEffect: React.FC<ParticleEffectProps> = ({
   isActive,

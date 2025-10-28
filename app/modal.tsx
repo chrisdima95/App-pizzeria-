@@ -3,7 +3,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function ModalScreen() {
   const { screen } = useLocalSearchParams<{ screen?: string }>();
@@ -33,6 +33,16 @@ export default function ModalScreen() {
         <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
           <IconSymbol name="xmark" size={22} color="#007AFF" />
         </TouchableOpacity>
+        
+        {/* Mascotte */}
+        <View style={styles.mascotteContainer}>
+          <Image
+            source={require("@/assets/images/Mascotte.png")}
+            style={styles.mascotte}
+            resizeMode="contain"
+          />
+        </View>
+        
         <ThemedText type="title" style={styles.headerTitle}>
           {screen === 'nuovo-indirizzo' ? 'Nuovo indirizzo' : 'Modale'}
         </ThemedText>
@@ -55,9 +65,21 @@ const styles = StyleSheet.create({
     marginRight: 12,
     padding: 8,
   },
+  mascotteContainer: {
+    width: 80,
+    height: 80,
+    marginRight: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mascotte: {
+    width: 70,
+    height: 70,
+  },
   headerTitle: {
     fontSize: 22,
     fontWeight: '600',
+    flex: 1,
   },
   content: {
     flex: 1,

@@ -3,12 +3,13 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import React, { useEffect, useRef } from "react";
 import {
-  Animated,
-  Modal,
-  Pressable,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    Animated,
+    Image,
+    Modal,
+    Pressable,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 export interface PizzaModalButton {
@@ -82,7 +83,7 @@ export const PizzaModal: React.FC<PizzaModalProps> = ({
     switch (style) {
       case "destructive":
         return {
-          backgroundColor: colors.error,
+          backgroundColor: colors.primary, // Usa il colore primario marrone invece di error
         };
       case "cancel":
         return {
@@ -133,14 +134,28 @@ export const PizzaModal: React.FC<PizzaModalProps> = ({
                 },
               ]}
             >
-              {/* Titolo */}
+              {/* Header con Mascotte e Titolo */}
               <View style={styles.header}>
-                <ThemedText
-                  type="title"
-                  style={[styles.title, { color: colors.text }]}
-                >
-                  {title}
-                </ThemedText>
+                <View style={styles.headerContent}>
+                  {/* Mascotte */}
+                  <View style={styles.mascotteContainer}>
+                    <Image
+                      source={require("@/assets/images/Mascotte.png")}
+                      style={styles.mascotte}
+                      resizeMode="contain"
+                    />
+                  </View>
+                  
+                  {/* Titolo */}
+                  <View style={styles.titleContainer}>
+                    <ThemedText
+                      type="title"
+                      style={[styles.title, { color: colors.text }]}
+                    >
+                      {title}
+                    </ThemedText>
+                  </View>
+                </View>
               </View>
 
               {/* Messaggio */}
@@ -211,10 +226,30 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 16,
   },
+  headerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
+  mascotteContainer: {
+    width: 80,
+    height: 80,
+    marginRight: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mascotte: {
+    width: 70,
+    height: 70,
+  },
+  titleContainer: {
+    flex: 1,
+    justifyContent: "center",
+  },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
-    textAlign: "center",
+    textAlign: "left",
   },
   messageContainer: {
     paddingHorizontal: 24,

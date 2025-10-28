@@ -3,24 +3,24 @@ import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePizzaModal } from "@/hooks/use-pizza-modal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { usePizzaModal } from "@/hooks/use-pizza-modal";
 import {
-  ActionSheetIOS,
-  Alert,
-  Image,
-  Modal,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  useColorScheme,
-  View,
+    ActionSheetIOS,
+    Alert,
+    Image,
+    Modal,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    useColorScheme,
+    View,
 } from "react-native";
 
 // Funzioni per salvare/caricare la foto profilo
@@ -661,9 +661,19 @@ export default function ProfiloScreen() {
             onPress={() => setShowImagePickerModal(false)}
           />
           <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
-            <ThemedText style={[styles.modalTitle, { color: colors.text }]}>
-              Cambia foto profilo
-            </ThemedText>
+            {/* Header con Mascotte e Titolo */}
+            <View style={styles.modalHeader}>
+              <View style={styles.modalMascotteContainer}>
+                <Image
+                  source={require("@/assets/images/Mascotte.png")}
+                  style={styles.modalMascotte}
+                  resizeMode="contain"
+                />
+              </View>
+              <ThemedText style={[styles.modalTitle, { color: colors.text }]}>
+                Cambia foto profilo
+              </ThemedText>
+            </View>
 
             <TouchableOpacity
               style={[styles.modalButton, { backgroundColor: colors.primary }]}
@@ -908,10 +918,29 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3,
   },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+    width: "100%",
+  },
+  modalMascotteContainer: {
+    width: 80,
+    height: 80,
+    marginRight: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalMascotte: {
+    width: 70,
+    height: 70,
+  },
   modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 20,
+    flex: 1,
+    textAlign: "center",
   },
   modalButton: {
     width: "100%",

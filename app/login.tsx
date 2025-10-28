@@ -3,9 +3,10 @@ import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { usePizzaModal } from '@/hooks/use-pizza-modal';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 
 export default function LoginScreen() {
   const { mode } = useLocalSearchParams<{ mode?: string }>();
@@ -21,9 +22,10 @@ export default function LoginScreen() {
   const [surnameError, setSurnameError] = useState<string>('');
   const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { login, register, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { login, register, isAuthenticated, isLoading: authLoading, isChefAuthenticated, chef } = useAuth();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const { showModal, ModalComponent } = usePizzaModal();
 
   // Redirect se già autenticato
   useEffect(() => {
@@ -101,15 +103,39 @@ export default function LoginScreen() {
       return;
     }
     
+    // Controlla se il Chef è già loggato
+    if (isChefAuthenticated && chef) {
+      showModal(
+        'Sessione Chef Attiva',
+        'Sei attualmente loggato come Chef. Devi effettuare il logout dalla pagina "Chef" per poter accedere come cliente.',
+        [
+          { text: 'Annulla', style: 'cancel' },
+          { 
+            text: 'Vai al Chef', 
+            onPress: () => {
+              // Pulisce i campi password per evitare l'alert "Vuoi salvare password"
+              setEmail('');
+              setPassword('');
+              // Piccolo delay per assicurarsi che i campi siano puliti prima del redirect
+              setTimeout(() => {
+                router.replace('/(tabs)/chef');
+              }, 100);
+            }
+          }
+        ]
+      );
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
       const success = await login(email, password);
       if (!success) {
-        Alert.alert('Errore', 'Credenziali non valide');
+        showModal('Errore', 'Credenziali non valide');
       }
     } catch (error) {
-      Alert.alert('Errore', 'Si è verificato un errore durante il login');
+      showModal('Errore', 'Si è verificato un errore durante il login');
     } finally {
       setIsLoading(false);
     }
@@ -122,15 +148,39 @@ export default function LoginScreen() {
       return;
     }
     
+    // Controlla se il Chef è già loggato
+    if (isChefAuthenticated && chef) {
+      showModal(
+        'Sessione Chef Attiva',
+        'Sei attualmente loggato come Chef. Devi effettuare il logout dalla pagina "Chef" per poter registrarti come cliente.',
+        [
+          { text: 'Annulla', style: 'cancel' },
+          { 
+            text: 'Vai al Chef', 
+            onPress: () => {
+              // Pulisce i campi password per evitare l'alert "Vuoi salvare password"
+              setEmail('');
+              setPassword('');
+              // Piccolo delay per assicurarsi che i campi siano puliti prima del redirect
+              setTimeout(() => {
+                router.replace('/(tabs)/chef');
+              }, 100);
+            }
+          }
+        ]
+      );
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
       const success = await register(name, surname, email, password, address);
       if (!success) {
-        Alert.alert('Errore', 'Si è verificato un errore durante la registrazione');
+        showModal('Errore', 'Si è verificato un errore durante la registrazione');
       }
     } catch (error) {
-      Alert.alert('Errore', 'Si è verificato un errore durante la registrazione');
+      showModal('Errore', 'Si è verificato un errore durante la registrazione');
     } finally {
       setIsLoading(false);
     }
@@ -270,6 +320,8 @@ export default function LoginScreen() {
               }
             }}
             secureTextEntry
+            autoComplete="off"
+            textContentType="none"
           />
           {hasSubmitted && passwordError ? (
             <ThemedText style={[styles.errorText, { color: colors.error }]}>{passwordError}</ThemedText>
@@ -324,6 +376,7 @@ export default function LoginScreen() {
           </TouchableOpacity>
         </ThemedView>
       </ScrollView>
+      <ModalComponent />
     </ThemedView>
   );
 }

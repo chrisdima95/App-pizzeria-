@@ -141,7 +141,7 @@
     "name": "Pizza Prosciutto e Funghi",
     "price": "11.50",
     "description": "Pomodoro, mozzarella, prosciutto, funghi",
-    "image": "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&fit=crop&q=80",
+    "image": "https://i1.wp.com/www.piccolericette.net/piccolericette/wp-content/uploads/2019/10/4102_Pizza.jpg?resize=895%2C616&ssl=1",
     "ingredients": [
       "Pomodoro",
       "Mozzarella",
@@ -164,7 +164,7 @@
     "name": "Pizza Quattro Formaggi",
     "price": "12.50",
     "description": "Mozzarella, gorgonzola, parmigiano, fontina",
-    "image": "https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=400&fit=crop&q=80",
+    "image": "https://www.vibrok.it/wp-content/uploads/2024/06/pizza-quattro-formaggi.jpg",
     "ingredients": [
       "Mozzarella",
       "Gorgonzola DOP",
@@ -279,7 +279,7 @@
     "name": "Pizza Patate e Salsiccia",
     "price": "10.50",
     "description": "Mozzarella, patate, salsiccia, rosmarino",
-    "image": "https://images.unsplash.com/photo-1534570122623-99e8378a9aa7?w=400&fit=crop&q=80",
+    "image": "https://staticcookist.akamaized.net/wp-content/uploads/sites/21/2020/05/pizza-patate-salsiccia-1200x675.jpg",
     "ingredients": [
       "Mozzarella",
       "Patate a fette",
@@ -325,7 +325,7 @@
     "name": "Pizza Tartufo e Porcini",
     "price": "18.00",
     "description": "Mozzarella, tartufo nero, funghi porcini, rucola",
-    "image": "https://images.unsplash.com/photo-1598298775553-862dae03f6b5?w=400&fit=crop&q=80",
+    "image": "https://www.obiettivonotizie.it/wp-content/uploads/2017/07/Pizza-funghi-porcini-e-tartufo.jpg",
     "ingredients": [
       "Mozzarella",
       "Tartufo nero",
@@ -348,7 +348,7 @@
     "name": "Pizza Gamberi e Zucchine",
     "price": "16.50",
     "description": "Mozzarella, gamberi, zucchine, pomodorini",
-    "image": "🍕",
+    "image": "https://pizzeriadoifanti.it/wp-content/uploads/2020/04/IMG_4519.jpeg",
     "ingredients": [
       "Mozzarella",
       "Gamberi freschi",

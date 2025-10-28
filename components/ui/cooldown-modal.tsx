@@ -70,8 +70,8 @@ export const CooldownModal: React.FC<CooldownModalProps> = ({
 
           {/* Messaggio */}
           <ThemedText style={[styles.message, { color: colors.text }]}>
-            Hai già riscattato un'offerta dalla ruota della fortuna!{'\n'}
-            Puoi rigirare la ruota dopo aver completato l'ordine.
+            Hai già riscattato un&apos;offerta dalla ruota della fortuna!{'\n'}
+            Devi aspettare il tempo indicato per poter rigirare la ruota.
           </ThemedText>
 
           {/* Countdown Timer */}
@@ -81,9 +81,6 @@ export const CooldownModal: React.FC<CooldownModalProps> = ({
             </ThemedText>
             <ThemedText type="title" style={[styles.timer, { color: colors.primary }]}>
               {time.formatted}
-            </ThemedText>
-            <ThemedText style={[styles.timerDetails, { color: colors.muted }]}>
-              {time.hours} ore, {time.minutes} minuti e {time.seconds} secondi
             </ThemedText>
           </View>
 
@@ -125,15 +122,15 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   mascotteContainer: {
-    width: 120,
-    height: 120,
+    width: 100,
+    height: 100,
     marginBottom: 16,
     alignItems: "center",
     justifyContent: "center",
   },
   mascotte: {
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
   },
   title: {
     fontSize: 24,

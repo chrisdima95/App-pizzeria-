@@ -2,13 +2,13 @@ import { ThemedText } from '@/components/themed-text';
 import { Colors } from '@/constants/theme';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Animated,
-    Dimensions,
-    FlatList,
-    StyleSheet,
-    TouchableOpacity,
-    useColorScheme,
-    View
+  Animated,
+  Dimensions,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+  View
 } from 'react-native';
 import { PizzaCard } from './pizza-card';
 
@@ -62,7 +62,6 @@ export function OfferCarousel({
   const colors = Colors[colorScheme ?? 'light'];
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   
   // Animazioni per effetti dinamici
   const scrollX = useRef(new Animated.Value(0)).current;
@@ -83,8 +82,8 @@ export function OfferCarousel({
         friction: 8,
         useNativeDriver: true,
       }),
-    ]).start(() => setIsLoading(false));
-  }, []);
+    ]).start();
+  }, [fadeAnim, scaleAnim]);
 
   // Funzione per calcolare l'opacità e scala basata sulla posizione
   const getCardStyle = (index: number) => {
@@ -134,15 +133,7 @@ export function OfferCarousel({
         >
           <PizzaCard
             variant="elevated"
-            style={[
-              styles.card,
-              {
-                backgroundColor: colors.card,
-                borderColor: colors.border,
-                opacity: isRedeemed ? 0.6 : 1,
-                ...getCategoryBorderStyle(categoryElements.accent, colors),
-              },
-            ]}
+            style={styles.card}
           >
             {/* Pattern di sfondo sottile */}
             <View style={[styles.patternOverlay, getPatternStyle(categoryElements.pattern, colors)]} />
@@ -242,18 +233,6 @@ export function OfferCarousel({
     );
   };
 
-  // Funzioni helper per stili dinamici
-  const getCategoryBorderStyle = (accent: string, colors: any) => {
-    const borderStyles = {
-      top: { borderTopWidth: 3, borderTopColor: colors.primary },
-      right: { borderRightWidth: 3, borderRightColor: colors.primary },
-      bottom: { borderBottomWidth: 3, borderBottomColor: colors.primary },
-      left: { borderLeftWidth: 3, borderLeftColor: colors.primary },
-      center: { borderWidth: 2, borderColor: colors.primary },
-      all: { borderWidth: 1, borderColor: colors.primary + '50' },
-    };
-    return borderStyles[accent as keyof typeof borderStyles] || borderStyles.center;
-  };
 
   const getPatternStyle = (pattern: string, colors: any) => {
     const patterns = {

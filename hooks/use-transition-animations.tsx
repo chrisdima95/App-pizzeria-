@@ -1,11 +1,11 @@
 import {
-    Easing,
-    useAnimatedStyle,
-    useSharedValue,
-    withDelay,
-    withSequence,
-    withSpring,
-    withTiming
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSequence,
+  withSpring,
+  withTiming
 } from 'react-native-reanimated';
 
 interface TransitionAnimationsConfig {
@@ -28,10 +28,6 @@ export const useTransitionAnimations = (config: TransitionAnimationsConfig = {})
   // Valori condivisi per le animazioni
   const fadeProgress = useSharedValue(0);
   const scaleProgress = useSharedValue(0);
-  const translateY = useSharedValue(100);
-  const translateX = useSharedValue(0);
-  const rotateProgress = useSharedValue(0);
-  const blurProgress = useSharedValue(0);
   
   // Animazioni per la mascotte rimosse - ora gestite separatamente nella tab bar
 
@@ -173,7 +169,7 @@ export const useTransitionAnimations = (config: TransitionAnimationsConfig = {})
     transform: [
       { translateY: card1TranslateY.value },
       { scale: card1Scale.value },
-    ],
+    ] as any,
     opacity: card1Opacity.value,
   }));
 
@@ -181,7 +177,7 @@ export const useTransitionAnimations = (config: TransitionAnimationsConfig = {})
     transform: [
       { translateY: card2TranslateY.value },
       { scale: card2Scale.value },
-    ],
+    ] as any,
     opacity: card2Opacity.value,
   }));
 
@@ -189,7 +185,7 @@ export const useTransitionAnimations = (config: TransitionAnimationsConfig = {})
     transform: [
       { translateY: card3TranslateY.value },
       { scale: card3Scale.value },
-    ],
+    ] as any,
     opacity: card3Opacity.value,
   }));
 
@@ -197,7 +193,7 @@ export const useTransitionAnimations = (config: TransitionAnimationsConfig = {})
     transform: [
       { translateY: card4TranslateY.value },
       { scale: card4Scale.value },
-    ],
+    ] as any,
     opacity: card4Opacity.value,
   }));
 
@@ -205,7 +201,7 @@ export const useTransitionAnimations = (config: TransitionAnimationsConfig = {})
     transform: [
       { translateY: card5TranslateY.value },
       { scale: card5Scale.value },
-    ],
+    ] as any,
     opacity: card5Opacity.value,
   }));
 
@@ -227,7 +223,7 @@ export const useTransitionAnimations = (config: TransitionAnimationsConfig = {})
     transform: [
       { translateY: chefRecommendationTranslateY.value },
       { scale: chefRecommendationScale.value },
-    ],
+    ] as any,
     opacity: chefRecommendationOpacity.value,
   }));
 
@@ -236,7 +232,7 @@ export const useTransitionAnimations = (config: TransitionAnimationsConfig = {})
       { translateY: cartButtonTranslateY.value },
       { scale: cartButtonScale.value },
       { rotate: `${cartButtonRotate.value}deg` },
-    ],
+    ] as any,
     opacity: cartButtonOpacity.value,
   }));
 
@@ -244,7 +240,7 @@ export const useTransitionAnimations = (config: TransitionAnimationsConfig = {})
     transform: [
       { translateX: categoriesTranslateX.value },
       { scale: categoriesScale.value },
-    ],
+    ] as any,
     opacity: categoriesOpacity.value,
   }));
 

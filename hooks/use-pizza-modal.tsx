@@ -1,5 +1,5 @@
+import { PizzaModal, PizzaModalButton } from "@/components/ui/pizza-modal";
 import React, { useState } from "react";
-import { PizzaModal, PizzaModalButton } from "@/components/ui";
 
 interface UsePizzaModalReturn {
   modalVisible: boolean;

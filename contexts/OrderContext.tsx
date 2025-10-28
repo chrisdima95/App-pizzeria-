@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { useAuth } from "./AuthContext";
 
-// Aggiungiamo il campo status
+// Aggiungiamo il campo status e userEmail
 export interface OrderItem {
   id: string;
   name: string;
@@ -17,6 +17,7 @@ export interface OrderItem {
   quantity: number;
   status: "pending" | "preparing" | "ready" | "delivered"; // status possibile
   notes?: string; // Note speciali per l'ordine
+  userEmail?: string; // Email dell'utente che ha effettuato l'ordine
 }
 
 interface OrderContextType {
@@ -31,6 +32,8 @@ interface OrderContextType {
   removeFromOrder: (id: string) => void; // rimuove completamente un ordine
   clearOrder: () => void;
   confirmOrder: () => Promise<void>;
+  resetWheelCooldown: () => void; // resetta il countdown della ruota
+  getAllOrders: () => Promise<OrderItem[][]>; // ottiene tutti gli ordini di tutti gli utenti
 }
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
@@ -40,7 +43,7 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
   const [completedOrders, setCompletedOrders] = useState<OrderItem[][]>([]);
   const [redeemedOffers, setRedeemedOffers] = useState<string[]>([]);
   const [lastWheelSpinTimestamp, setLastWheelSpinTimestamp] = useState<number | null>(null);
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, registerResetCallback, registerLogoutCallback } = useAuth();
   // Insieme degli ID di tutte le offerte disponibili (ruota)
   const offerIdSet = new Set<string>(getAllOffers().map((o) => o.id));
 
@@ -113,6 +116,10 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
         } else {
           setLastWheelSpinTimestamp(null);
         }
+        
+        // IMPORTANTE: Reset del countdown dopo aver caricato i dati del nuovo utente
+        // Questo garantisce che ogni nuovo login/registrazione resetti il countdown
+        setLastWheelSpinTimestamp(null);
       } catch (e) {
         console.error("Errore nel caricamento ordini da AsyncStorage", e);
         setOrders([]);
@@ -229,7 +236,7 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
   const clearOrder = () => setOrders([]);
 
   const confirmOrder = async () => {
-    if (!orders.length) return;
+    if (!orders.length || !user) return;
 
     // Identifica le offerte nell'ordine corrente
     const offersInOrder = orders.filter((order) => offerIdSet.has(order.id));
@@ -246,11 +253,62 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
       setLastWheelSpinTimestamp(Date.now());
     }
 
+    // Crea una copia degli ordini con l'email dell'utente
+    const ordersWithUserEmail = orders.map((o) => ({ 
+      ...o, 
+      userEmail: user.email 
+    }));
+
     // aggiunge lo snapshot corrente degli ordini nello storico
-    setCompletedOrders((prev) => [...prev, orders.map((o) => ({ ...o }))]);
+    setCompletedOrders((prev) => [...prev, ordersWithUserEmail]);
+    
+    // Salva anche negli ordini globali per il chef
+    try {
+      const globalOrdersKey = 'globalOrders';
+      const existingGlobalOrders = await AsyncStorage.getItem(globalOrdersKey);
+      const globalOrders: OrderItem[][] = existingGlobalOrders ? JSON.parse(existingGlobalOrders) : [];
+      globalOrders.push(ordersWithUserEmail);
+      await AsyncStorage.setItem(globalOrdersKey, JSON.stringify(globalOrders));
+    } catch (error) {
+      console.error('Errore nel salvataggio ordini globali:', error);
+    }
+    
     // svuota il carrello
     setOrders([]);
   };
+
+  const resetWheelCooldown = () => {
+    setLastWheelSpinTimestamp(null);
+  };
+
+  const getAllOrders = async (): Promise<OrderItem[][]> => {
+    try {
+      const globalOrdersKey = 'globalOrders';
+      const globalOrdersJson = await AsyncStorage.getItem(globalOrdersKey);
+      return globalOrdersJson ? JSON.parse(globalOrdersJson) : [];
+    } catch (error) {
+      console.error('Errore nel recupero ordini globali:', error);
+      return [];
+    }
+  };
+
+  // Registra il callback per il reset del countdown nel AuthContext
+  useEffect(() => {
+    registerResetCallback(() => {
+      setLastWheelSpinTimestamp(null);
+    });
+  }, []); // Array vuoto per eseguire solo una volta
+
+  // Registra il callback per il logout per pulire completamente i dati
+  useEffect(() => {
+    registerLogoutCallback(() => {
+      // Pulisce tutti i dati dell'utente corrente
+      setOrders([]);
+      setCompletedOrders([]);
+      setRedeemedOffers([]);
+      setLastWheelSpinTimestamp(null);
+    });
+  }, []); // Array vuoto per eseguire solo una volta
 
   return (
     <OrderContext.Provider
@@ -266,6 +324,8 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
         removeFromOrder,
         clearOrder,
         confirmOrder,
+        resetWheelCooldown,
+        getAllOrders,
       }}
     >
       {children}

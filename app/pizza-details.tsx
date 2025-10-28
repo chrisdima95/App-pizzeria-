@@ -4,18 +4,18 @@ import { Colors } from "@/constants/theme";
 import { useOrder } from "@/contexts/OrderContext";
 import { usePizzaModal } from "@/hooks/use-pizza-modal";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
-  Animated,
-  Dimensions,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  TextInput,
-  TouchableOpacity,
-  useColorScheme,
-  View,
+    Animated,
+    Dimensions,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    TextInput,
+    TouchableOpacity,
+    useColorScheme,
+    View
 } from "react-native";
 
 // Interfaccia per le personalizzazioni
@@ -33,6 +33,11 @@ export default function PizzaDetailsScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
   const { showModal, ModalComponent } = usePizzaModal();
+
+  // Calcola la larghezza dell'immagine per allinearla alle card sottostanti
+  const { width: screenWidth } = Dimensions.get("window");
+  const cardMargin = 20; // Margine orizzontale delle card
+  const imageWidth = screenWidth - (cardMargin * 2); // Larghezza dell'immagine = larghezza schermo - margini delle card
 
   const pizzaId = (params.id as string) || "1";
   const pizzaName = (params.name as string) || "Pizza Margherita";
@@ -148,10 +153,10 @@ export default function PizzaDetailsScreen() {
 
     // Notifica pizza aggiunta
     showModal(
-      "🍕 Pizza aggiunta!",
+      "Pizza aggiunta!",
       `${customPizzaName} è stata aggiunta al carrello!`,
       [
-        { text: "Continua a ordinare" },
+        { text: "Continua a ordinare", style: "cancel" },
         {
           text: "Vai al carrello",
           onPress: () => router.push("/checkout"),
@@ -185,7 +190,7 @@ export default function PizzaDetailsScreen() {
             {pizzaImage.startsWith("http") ? (
               <Image
                 source={{ uri: pizzaImage }}
-                style={styles.pizzaImageReal}
+                style={[styles.pizzaImageReal, { width: imageWidth }]}
                 resizeMode="cover"
               />
             ) : (
@@ -461,7 +466,7 @@ export default function PizzaDetailsScreen() {
           >
             <IconSymbol size={20} name="plus" color="white" />
             <ThemedText style={styles.orderButtonText}>
-              Aggiungi all'ordine - €{totalPrice.toFixed(2)}
+              Aggiungi • €{totalPrice.toFixed(2)}
             </ThemedText>
           </TouchableOpacity>
         )}
@@ -493,7 +498,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   pizzaImageReal: {
-    width: 318,
     height: 190,
     borderRadius: 30,
     marginTop: 110,

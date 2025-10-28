@@ -1,4 +1,4 @@
-import { Offer } from './offer-carousel';
+import { Offer } from '../components/ui/offer-carousel';
 
 // Offerte per bambini (5-12 anni)
 export const kidsOffers: Offer[] = [

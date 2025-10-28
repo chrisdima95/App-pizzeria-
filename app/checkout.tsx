@@ -6,12 +6,13 @@ import { usePizzaModal } from "@/hooks/use-pizza-modal";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
-  FlatList,
-  Platform,
-  StyleSheet,
-  TouchableOpacity,
-  useColorScheme,
-  View,
+    FlatList,
+    Platform,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    useColorScheme,
+    View,
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 
@@ -143,17 +144,13 @@ export default function CheckoutScreen() {
             renderItem={({ item }) => (
               <Swipeable
                 renderRightActions={() => (
-                  <View style={styles.deleteAction}>
-                    <IconSymbol size={24} name="trash" color="white" />
-                    <ThemedText style={styles.deleteActionText}>
-                      Rimuovi
-                    </ThemedText>
-                  </View>
+                  <View style={styles.transparentAction} />
                 )}
-                overshootRight={false}
-                onSwipeableOpen={() => removeFromOrder(item.id)}
-                friction={1}
-                rightThreshold={40}
+                overshootRight={true}
+                onSwipeableWillOpen={() => removeFromOrder(item.id)}
+                friction={0.3}
+                rightThreshold={0}
+                enableTrackpadTwoFingerGesture={true}
               >
                 <View
                   style={[
@@ -180,7 +177,7 @@ export default function CheckoutScreen() {
                     <ThemedText
                       style={[styles.itemPrice, { color: colors.primary }]}
                     >
-                      €{(item.price * item.quantity).toFixed(2)}
+                      €{item.price.toFixed(2)} × {item.quantity} = €{(item.price * item.quantity).toFixed(2)}
                     </ThemedText>
                   </View>
 
@@ -188,23 +185,25 @@ export default function CheckoutScreen() {
                     <TouchableOpacity
                       style={[
                         styles.quantityButton,
-                        { backgroundColor: colors.border },
+                        { backgroundColor: colors.secondary },
                       ]}
                       onPress={() => updateQuantity(item.id, item.quantity - 1)}
                     >
-                      <IconSymbol size={16} name="minus" color={colors.text} />
+                      <IconSymbol size={16} name="minus" color="white" />
                     </TouchableOpacity>
 
-                    <ThemedText
+                    <Text
                       style={[styles.quantityText, { color: colors.text }]}
+                      numberOfLines={1}
+                      ellipsizeMode="clip"
                     >
                       {item.quantity}
-                    </ThemedText>
+                    </Text>
 
                     <TouchableOpacity
                       style={[
                         styles.quantityButton,
-                        { backgroundColor: "green" },
+                        { backgroundColor: colors.secondary },
                       ]}
                       onPress={() => updateQuantity(item.id, item.quantity + 1)}
                     >
@@ -231,28 +230,40 @@ export default function CheckoutScreen() {
       </View>
 
       {orders.length > 0 && (
-        <TouchableOpacity
-          style={[
-            styles.clearButton,
-            { backgroundColor: colors.error, borderColor: colors.error },
-          ]}
-          onPress={handleClearCart}
-        >
-          <ThemedText style={styles.clearButtonText}>
-            Svuota carrello
-          </ThemedText>
-        </TouchableOpacity>
-      )}
+        <>
+          {/* Barra di riepilogo del totale */}
+          <View style={[styles.totalSummary, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <ThemedText style={[styles.totalLabel, { color: colors.text }]}>
+              Totale ordine:
+            </ThemedText>
+            <ThemedText style={[styles.totalAmount, { color: colors.primary }]}>
+              €{totalPrice.toFixed(2)}
+            </ThemedText>
+          </View>
 
-      {orders.length > 0 && (
-        <TouchableOpacity
-          style={[styles.confirmButton]}
-          onPress={handleConfirmOrder}
-        >
-          <ThemedText style={styles.confirmButtonText}>
-            Conferma ordine - €{totalPrice.toFixed(2)}
-          </ThemedText>
-        </TouchableOpacity>
+          {/* Pulsante Svuota carrello (filled con sfondo rosso chiaro) */}
+          <TouchableOpacity
+            style={[
+              styles.clearButton,
+              { backgroundColor: colors.error + '15', borderColor: colors.error },
+            ]}
+            onPress={handleClearCart}
+          >
+            <ThemedText style={[styles.clearButtonText, { color: colors.error }]}>
+              Svuota carrello
+            </ThemedText>
+          </TouchableOpacity>
+
+          {/* Pulsante Conferma ordine */}
+          <TouchableOpacity
+            style={[styles.confirmButton, { backgroundColor: colors.primary }]}
+            onPress={handleConfirmOrder}
+          >
+            <ThemedText style={styles.confirmButtonText}>
+              Conferma ordine
+            </ThemedText>
+          </TouchableOpacity>
+        </>
       )}
       <ModalComponent />
     </View>
@@ -313,12 +324,14 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     width: "100%",
-    borderRadius: 8,
-    marginBottom: 8,
+    borderRadius: 12,
+    marginBottom: 12,
     marginHorizontal: 0,
     elevation: 2,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    minHeight: 80,
   },
   pizzaImage: {
     width: 50,
@@ -333,6 +346,8 @@ const styles = StyleSheet.create({
   },
   itemInfo: {
     flex: 1,
+    marginRight: 8,
+    justifyContent: "center",
   },
   itemName: {
     fontSize: 16,
@@ -345,64 +360,86 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   itemPrice: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "500",
+    marginTop: 2,
   },
   quantityControls: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    justifyContent: "center",
+    flexShrink: 0,
+    width: 140,
+    height: 40,
+    paddingHorizontal: 8,
   },
   quantityButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
+    marginHorizontal: 2,
   },
   quantityText: {
     fontSize: 16,
-    fontWeight: "600",
-    minWidth: 24,
+    fontWeight: "700",
+    minWidth: 40,
+    maxWidth: 50,
     textAlign: "center",
+    flexShrink: 0,
+    lineHeight: 20,
+    includeFontPadding: false,
+    textAlignVertical: "center",
+    backgroundColor: "transparent",
+    marginHorizontal: 4,
   },
   removeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
     marginLeft: 4,
   },
-  deleteAction: {
-    backgroundColor: "#E53E3E",
-    justifyContent: "center",
-    alignItems: "flex-end",
-    paddingHorizontal: 20,
-    paddingRight: 30,
-    borderRadius: 8,
-    marginBottom: 8,
-    minHeight: 70,
-    width: 120,
+  transparentAction: {
+    backgroundColor: 'transparent',
+    width: 200,
+    height: '100%',
   },
-  deleteActionText: {
-    color: "white",
-    fontSize: 14,
+  totalSummary: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    marginTop: 24,
+    borderRadius: 16,
+    borderWidth: 1,
+    elevation: 3,
+    shadowColor: "#703537",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+  },
+  totalLabel: {
+    fontSize: 16,
     fontWeight: "600",
-    marginTop: 4,
+  },
+  totalAmount: {
+    fontSize: 20,
+    fontWeight: "bold",
   },
   confirmButton: {
-    padding: 18,
+    padding: 20,
     borderRadius: 16,
-    marginTop: 20,
+    marginTop: 16,
     width: "100%",
     alignItems: "center",
     elevation: 3,
-    shadowColor: "#E53E3E",
+    shadowColor: "#703537",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
-    backgroundColor: "green",
   },
   confirmButtonText: {
     color: "white",
@@ -410,21 +447,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   clearButton: {
-    padding: 16,
+    padding: 18,
     borderRadius: 16,
     marginTop: 12,
     marginBottom: 8,
     width: "100%",
     alignItems: "center",
-    borderWidth: 1,
-    elevation: 2,
-    shadowColor: "#E53E3E",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    borderWidth: 2,
+    justifyContent: "center",
+    minHeight: 50,
   },
   clearButtonText: {
-    color: "white",
     fontSize: 16,
     fontWeight: "600",
   },
