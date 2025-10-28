@@ -1,9 +1,10 @@
+import { TabHeader } from "@/components/TabHeader";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { Colors } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrder } from "@/contexts/OrderContext";
-import { usePizzaColors } from "@/hooks/use-pizza-theme";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
@@ -68,7 +69,7 @@ const getStatusColor = (
 export default function OrdiniScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
-  const colors = usePizzaColors();
+  const colors = Colors[colorScheme ?? "light"];
   const { user, isAuthenticated } = useAuth();
   const { completedOrders } = useOrder();
   const isDark = colorScheme === "dark";
@@ -103,18 +104,18 @@ export default function OrdiniScreen() {
           <View
             style={[
               styles.authRequiredCard,
-              { backgroundColor: colors.surface, borderColor: colors.border },
+              { backgroundColor: colors.card, borderColor: colors.border },
             ]}
           >
             <ThemedText
-              style={[styles.authRequiredText, { color: colors.textSecondary }]}
+              style={[styles.authRequiredText, { color: colors.muted }]}
             >
               Devi essere autenticato per vedere i tuoi ordini
             </ThemedText>
             <ThemedText
               style={[
                 styles.authRequiredSubtext,
-                { color: colors.textSecondary },
+                { color: colors.muted },
               ]}
             >
               Accedi o registrati per visualizzare la cronologia degli ordini
@@ -130,7 +131,7 @@ export default function OrdiniScreen() {
       style={[
         styles.orderCard,
         {
-          backgroundColor: colors.background,
+          backgroundColor: colors.card,
           borderColor: colors.border,
           shadowColor: colors.primary,
         },
@@ -178,19 +179,10 @@ export default function OrdiniScreen() {
     <ThemedView
       style={[styles.container, { backgroundColor: colors.background }]}
     >
-      {/* Header */}
-      <ThemedView
-        style={[styles.header, { backgroundColor: colors.background }]}
-      >
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <IconSymbol size={24} name="chevron.left" color={colors.text} />
-        </TouchableOpacity>
-        <ThemedText type="title" style={[styles.title, { color: colors.text }]}>
-          I tuoi ordini
-        </ThemedText>
+      <TabHeader title="I tuoi ordini" showMascotte={false} />
+
+      {/* Pulsante Nuovo Ordine */}
+      <View style={styles.newOrderContainer}>
         <TouchableOpacity
           style={[
             styles.newOrderButton,
@@ -208,18 +200,18 @@ export default function OrdiniScreen() {
             Nuovo ordine
           </ThemedText>
         </TouchableOpacity>
-      </ThemedView>
+      </View>
 
       {/* Orders List */}
       {orderGroups.length === 0 ? (
         <View style={styles.emptyContainer}>
           <ThemedText
-            style={[styles.emptyText, { color: colors.textSecondary }]}
+            style={[styles.emptyText, { color: colors.muted }]}
           >
             Non hai ancora effettuato ordini
           </ThemedText>
           <ThemedText
-            style={[styles.emptySubtext, { color: colors.textSecondary }]}
+            style={[styles.emptySubtext, { color: colors.muted }]}
           >
             Vai al menu per iniziare a ordinare!
           </ThemedText>
@@ -241,28 +233,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 20,
-    paddingTop: 60,
-  },
-  backButton: {
-    padding: 8,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    flex: 1,
-    textAlign: "center",
+  newOrderContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    alignItems: "flex-end",
   },
   newOrderButton: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 20,
     borderWidth: 1,
     elevation: 2,
@@ -271,23 +252,22 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   newOrderText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "600",
   },
   ordersList: {
-    padding: 20,
-    gap: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    gap: 12,
   },
   orderCard: {
-    borderRadius: 12,
-    padding: 16,
-    marginHorizontal: 4,
-    elevation: 2,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    borderWidth: 0.5,
-    borderColor: "rgba(0,0,0,0.08)",
+    borderRadius: 16,
+    padding: 20,
+    elevation: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    borderWidth: 1,
   },
   orderContent: {
     gap: 12,
