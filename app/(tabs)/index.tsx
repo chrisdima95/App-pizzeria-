@@ -254,7 +254,7 @@ export default function HomeScreen() {
                     <TouchableOpacity
                       style={[
                         styles.quantityButton,
-                        { backgroundColor: "darkgreen" },
+                        { backgroundColor: colors.secondary },
                       ]}
                       onPress={() =>
                         handleUpdateQuantity(item.id, quantity + 1)
@@ -341,13 +341,13 @@ export default function HomeScreen() {
           <TouchableOpacity
             style={[
               styles.floatingCartButton,
-              { backgroundColor: "darkgreen" },
+              { backgroundColor: colors.secondary },
             ]}
             onPress={handleCartPress}
             activeOpacity={0.8}
           >
             <IconSymbol size={24} name="cart.fill" color="white" />
-            <View style={[styles.cartBadge, { backgroundColor: "darkgreen" }]}>
+            <View style={[styles.cartBadge, { backgroundColor: colors.secondary }]}>
               <ThemedText style={styles.cartBadgeText}>
                 {totalItems > 99 ? "99+" : totalItems}
               </ThemedText>

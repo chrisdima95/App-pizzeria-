@@ -3,13 +3,13 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import React, { useEffect, useRef } from "react";
 import {
-  Animated,
-  Modal,
-  Pressable,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  Image,
+    Animated,
+    Image,
+    Modal,
+    Pressable,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 export interface PizzaModalButton {
@@ -137,7 +137,7 @@ export const PizzaModal: React.FC<PizzaModalProps> = ({
               {/* Header con mascotte a sinistra e testi a destra */}
               <View style={styles.headerRow}>
                 <Image
-                  source={require("@/assets/images/MascotteLogo.png")}
+                  source={require("@/assets/images/Mascotte.png")}
                   style={styles.mascotte}
                   resizeMode="contain"
                 />
@@ -226,8 +226,8 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   mascotte: {
-    width: 56,
-    height: 56,
+    width: 80,
+    height: 80,
   },
   headerTextContainer: {
     flex: 1,

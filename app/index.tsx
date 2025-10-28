@@ -60,7 +60,6 @@ export default function WelcomeScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#ffeec9",
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
@@ -73,7 +72,6 @@ const styles = StyleSheet.create({
     width: Platform.OS === "ios" ? 280 : 320,
     height: Platform.OS === "ios" ? 280 : 320,
     marginBottom: Platform.OS === "ios" ? 0 : -20,
-    backgroundColor: "#ffeec9",
   },
   logo: {
     width: "100%",
@@ -84,12 +82,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 12,
     textAlign: "center",
-    color: "#5C4033",
   },
   subtitle: {
     fontSize: 18,
     textAlign: "center",
-    color: "#5C4033",
   },
   loadingText: {
     fontSize: 16,

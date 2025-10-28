@@ -135,12 +135,14 @@ import { PizzaLoading } from '@/components/ui';
 
 I componenti utilizzano la palette di colori definita in `@/constants/colors`:
 
-- **Primary**: #E53E3E (Rosso pomodoro)
-- **Secondary**: #38A169 (Verde basilico)
+- **Primary**: #703537 (Marrone scuro per bottoni e elementi principali)
+- **Secondary**: #38A169 (Verde basilico standardizzato)
 - **Accent**: #F6AD55 (Arancione caldo)
-- **Success**: #38A169 (Verde per successi)
+- **Success**: #22C55E (Verde brillante per successi - distintivo dal secondary)
 - **Warning**: #F6AD55 (Arancione per avvisi)
-- **Error**: #E53E3E (Rosso per errori)
+- **Error**: #DC2626 (Rosso acceso per errori - distintivo dal rosso pomodoro)
+- **Urgent**: #E53E3E (Rosso pomodoro per elementi di urgenza)
+- **Highlight**: #F6E05E (Giallo mozzarella per highlights)
 
 ## Utilizzo
 

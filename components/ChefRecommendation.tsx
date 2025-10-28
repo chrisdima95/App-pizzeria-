@@ -4,12 +4,12 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  Animated,
-  Dimensions,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    Animated,
+    Dimensions,
+    Image,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 interface Pizza {

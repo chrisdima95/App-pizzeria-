@@ -6,24 +6,26 @@
 import { Platform } from "react-native";
 
 // Colori tema pizzeria - palette calda e appetitosa
-const tintColorLight = "#E53E3E"; // Rosso pomodoro
+const tintColorLight = "#703537"; // Marrone scuro per elementi attivi
 const tintColorDark = "#F6AD55"; // Arancione caldo
 
 export const Colors = {
   light: {
-    text: "#5C4033", // Marrone scuro per testi
+    text: "#2D1B1B", // Marrone molto scuro per testi - miglior contrasto (4.5:1)
     background: "#ffeec9", // Beige crema per sfondi
     tint: tintColorLight,
     icon: "#718096", // Grigio medio
     tabIconDefault: "#A0AEC0", // Grigio chiaro
     tabIconSelected: tintColorLight,
     // Colori aggiuntivi per la pizzeria
-    primary: "#703537", // Rosso pomodoro
-    secondary: "darkgreen", // Verde basilico
+    primary: "#703537", // Marrone scuro per bottoni e elementi principali
+    secondary: "#38A169", // Verde basilico standardizzato
     accent: "#F6AD55", // Arancione caldo
-    success: "#38A169", // Verde per successi
+    success: "#22C55E", // Verde brillante per successi - distintivo dal secondary
     warning: "#F6AD55", // Arancione per avvisi
-    error: "#D04321", // Rosso per errori
+    error: "#DC2626", // Rosso acceso per errori - distintivo dal rosso pomodoro
+    urgent: "#E53E3E", // Rosso pomodoro per elementi di urgenza
+    highlight: "#F6E05E", // Giallo mozzarella per highlights
     card: "#FFFFFF", // Bianco per le card
     border: "#E2E8F0", // Grigio chiaro per bordi
     muted: "#718096", // Grigio per testi secondari
@@ -36,12 +38,14 @@ export const Colors = {
     tabIconDefault: "#718096", // Grigio medio
     tabIconSelected: tintColorDark,
     // Colori aggiuntivi per la pizzeria
-    primary: "#F6AD55", // Arancione caldo
-    secondary: "#68D391", // Verde chiaro
-    accent: "#E53E3E", // Rosso pomodoro
-    success: "#68D391", // Verde per successi
+    primary: "#8B4513", // Marrone più chiaro per coerenza brand
+    secondary: "#38A169", // Verde basilico standardizzato - stesso verde light mode
+    accent: "#F6AD55", // Arancione caldo - unificato con light mode
+    success: "#22C55E", // Verde brillante per successi - distintivo
     warning: "#F6AD55", // Arancione per avvisi
-    error: "#DB6C32", // Rosso chiaro per errori
+    error: "#DC2626", // Rosso acceso per errori - distintivo dal rosso pomodoro
+    urgent: "#E53E3E", // Rosso pomodoro per elementi di urgenza
+    highlight: "#F6E05E", // Giallo mozzarella per highlights
     card: "#2D3748", // Marrone scuro per le card
     border: "#4A5568", // Grigio scuro per bordi
     muted: "#A0AEC0", // Grigio chiaro per testi secondari
