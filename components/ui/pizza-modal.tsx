@@ -3,13 +3,12 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import React, { useEffect, useRef } from "react";
 import {
-    Animated,
-    Image,
-    Modal,
-    Pressable,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  Animated,
+  Modal,
+  Pressable,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export interface PizzaModalButton {
@@ -134,29 +133,24 @@ export const PizzaModal: React.FC<PizzaModalProps> = ({
                 },
               ]}
             >
-              {/* Header con mascotte a sinistra e testi a destra */}
-              <View style={styles.headerRow}>
-                <Image
-                  source={require("@/assets/images/Mascotte.png")}
-                  style={styles.mascotte}
-                  resizeMode="contain"
-                />
-                <View style={styles.headerTextContainer}>
-                  <ThemedText
-                    type="title"
-                    style={[styles.title, { color: colors.text }]}
-                  >
-                    {title}
-                  </ThemedText>
-                  {message && (
-                    <ThemedText
-                      style={[styles.message, { color: colors.text }]}
-                    >
-                      {message}
-                    </ThemedText>
-                  )}
-                </View>
+              {/* Titolo */}
+              <View style={styles.header}>
+                <ThemedText
+                  type="title"
+                  style={[styles.title, { color: colors.text }]}
+                >
+                  {title}
+                </ThemedText>
               </View>
+
+              {/* Messaggio */}
+              {message && (
+                <View style={styles.messageContainer}>
+                  <ThemedText style={[styles.message, { color: colors.text }]}>
+                    {message}
+                  </ThemedText>
+                </View>
+              )}
 
               {/* Pulsanti */}
               <View style={styles.buttonsContainer}>
@@ -217,32 +211,19 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 16,
   },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 8,
-    gap: 12,
-  },
-  mascotte: {
-    width: 80,
-    height: 80,
-  },
-  headerTextContainer: {
-    flex: 1,
-  },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "bold",
-    textAlign: "left",
+    textAlign: "center",
+  },
+  messageContainer: {
+    paddingHorizontal: 24,
+    paddingBottom: 24,
   },
   message: {
-    fontSize: 14,
-    textAlign: "left",
-    lineHeight: 20,
-    marginTop: 4,
-    paddingRight: 8,
+    fontSize: 16,
+    textAlign: "center",
+    lineHeight: 24,
   },
   buttonsContainer: {
     flexDirection: "row",
