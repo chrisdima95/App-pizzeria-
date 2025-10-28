@@ -7,11 +7,11 @@ import { usePizzaColors } from "@/hooks/use-pizza-theme";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  useColorScheme,
-  View,
+    FlatList,
+    StyleSheet,
+    TouchableOpacity,
+    useColorScheme,
+    View,
 } from "react-native";
 
 interface OrderGroup {
@@ -126,39 +126,52 @@ export default function OrdiniScreen() {
   }
 
   const renderOrderGroup = ({ item }: { item: OrderGroup }) => (
-    <ThemedView
+    <View
       style={[
         styles.orderCard,
         {
-          backgroundColor: colors.surface,
+          backgroundColor: colors.background,
           borderColor: colors.border,
           shadowColor: colors.primary,
         },
       ]}
     >
-      <ThemedView style={styles.orderContent}>
+      <View style={styles.orderContent}>
         <ThemedText
           type="subtitle"
           style={[styles.orderDate, { color: colors.text }]}
         >
           Ordine del {item.date}
         </ThemedText>
-        <ThemedText style={[styles.orderTotal, { color: colors.primary }]}>
-          Totale: €{item.total.toFixed(2)}
-        </ThemedText>
 
-        {item.orders.map((order) => (
-          <View key={order.id} style={styles.orderItem}>
-            <ThemedText style={[styles.orderName, { color: colors.text }]}>
-              {order.name} x{order.quantity}
-            </ThemedText>
-            <ThemedText style={[styles.orderPrice, { color: colors.primary }]}>
-              €{(order.price * order.quantity).toFixed(2)}
-            </ThemedText>
-          </View>
-        ))}
-      </ThemedView>
-    </ThemedView>
+        <View style={styles.orderItemsContainer}>
+          {item.orders.map((order) => (
+            <View key={order.id} style={styles.orderItem}>
+              <View style={styles.orderItemLeft}>
+                <ThemedText 
+                  style={[styles.orderName, { color: colors.text }]}
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
+                >
+                  {order.name} x{order.quantity}
+                </ThemedText>
+              </View>
+              <View style={styles.orderItemRight}>
+                <ThemedText style={[styles.orderPrice, { color: colors.primary }]}>
+                  €{(order.price * order.quantity).toFixed(2)}
+                </ThemedText>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.totalContainer}>
+          <ThemedText style={[styles.orderTotal, { color: colors.primary }]}>
+            Totale: €{item.total.toFixed(2)}
+          </ThemedText>
+        </View>
+      </View>
+    </View>
   );
 
   return (
@@ -182,15 +195,15 @@ export default function OrdiniScreen() {
           style={[
             styles.newOrderButton,
             {
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
+              backgroundColor: colors.primary,
+              borderColor: colors.primary,
             },
           ]}
           onPress={() => router.push("/(tabs)")}
         >
-          <IconSymbol size={20} name="plus" color={colors.secondary} />
+          <IconSymbol size={18} name="plus" color="white" />
           <ThemedText
-            style={[styles.newOrderText, { color: colors.secondary }]}
+            style={[styles.newOrderText, { color: "white" }]}
           >
             Nuovo ordine
           </ThemedText>
@@ -248,10 +261,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 20,
     borderWidth: 1,
+    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   newOrderText: {
     fontSize: 13,
@@ -262,52 +279,65 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   orderCard: {
-    borderRadius: 16,
-    padding: 20,
-    elevation: 3,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    borderWidth: 1,
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 4,
+    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    borderWidth: 0.5,
+    borderColor: "rgba(0,0,0,0.08)",
   },
   orderContent: {
-    gap: 6,
-  },
-  orderName: {
-    fontSize: 20,
-    fontWeight: "700",
-    marginBottom: 4,
-  },
-  orderQuantity: {
-    fontSize: 14,
-  },
-  orderStatus: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginTop: 4,
-  },
-  orderPrice: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginTop: 4,
+    gap: 12,
   },
   orderDate: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
-    marginBottom: 8,
+    marginBottom: 4,
+  },
+  totalContainer: {
+    marginTop: 8,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0,0,0,0.1)",
+    alignItems: "flex-end",
   },
   orderTotal: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 12,
+    textAlign: "right",
+  },
+  orderItemsContainer: {
+    gap: 8,
   },
   orderItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.1)",
+    alignItems: "flex-start",
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    backgroundColor: "rgba(0,0,0,0.02)",
+    borderRadius: 8,
+  },
+  orderItemLeft: {
+    flex: 1,
+    marginRight: 12,
+  },
+  orderItemRight: {
+    minWidth: 80,
+    alignItems: "flex-end",
+  },
+  orderName: {
+    fontSize: 14,
+    fontWeight: "500",
+    lineHeight: 18,
+  },
+  orderPrice: {
+    fontSize: 14,
+    fontWeight: "600",
+    textAlign: "right",
   },
   emptyContainer: {
     flex: 1,
