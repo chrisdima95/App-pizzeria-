@@ -1,140 +1,95 @@
-import { ParticleEffect } from '@/components/ParticleEffect';
-import { ThemedText } from '@/components/themed-text';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useTransitionAnimations } from '@/hooks/use-transition-animations';
-import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet } from 'react-native';
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withDelay, withSequence, withSpring, withTiming } from 'react-native-reanimated';
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { Colors } from "@/constants/theme";
+import { useAuth } from "@/contexts/AuthContext";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { router } from "expo-router";
+import React, { useEffect } from "react";
+import { ActivityIndicator, Image, StyleSheet } from "react-native";
 
-export default function IndexScreen() {
+export default function WelcomeScreen() {
+  const { isLoading } = useAuth();
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-  const { exitAnimations } = useTransitionAnimations();
-  const [showParticles, setShowParticles] = useState(false);
-
-  // Animazioni per la schermata di benvenuto
-  const fadeIn = useSharedValue(0);
-  const scaleIn = useSharedValue(0.9); // Ridotto da 0.8 a 0.9 per meno distorsione
-  const titleTranslateY = useSharedValue(50);
-  const subtitleTranslateY = useSharedValue(30);
+  const colors = Colors[colorScheme ?? "light"];
 
   useEffect(() => {
-    // Animazione di entrata
-    fadeIn.value = withTiming(1, { duration: 800, easing: Easing.out(Easing.quad) });
-    scaleIn.value = withSpring(1, { damping: 15, stiffness: 150 });
-    titleTranslateY.value = withSequence(
-      withTiming(0, { duration: 600, easing: Easing.out(Easing.back(1.5)) }),
-      withTiming(-10, { duration: 400, easing: Easing.out(Easing.quad) })
-    );
-    subtitleTranslateY.value = withDelay(200, withTiming(0, { duration: 600, easing: Easing.out(Easing.quad) }));
-
-    // Avvia le particelle dopo 1 secondo
-    const particleTimer = setTimeout(() => {
-      setShowParticles(true);
-    }, 1000);
-
-    // Dopo 2.5 secondi, avvia l'animazione di uscita e vai alla schermata successiva
+    // Attendi 2 secondi prima di navigare
     const timer = setTimeout(() => {
-      exitAnimations();
-      // Piccolo delay per permettere all'animazione di uscita di completarsi
-      setTimeout(() => {
-        router.replace('/(tabs)');
-      }, 400);
-    }, 2500);
+      if (!isLoading) {
+        // Vai direttamente alle tabs senza richiedere l'accesso
+        router.replace("/(tabs)");
+      }
+    }, 2000);
 
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(particleTimer);
-    };
-  }, []);
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
-  const containerAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: fadeIn.value,
-    transform: [{ scale: scaleIn.value }],
-    // Proprietà per migliorare la qualità del rendering durante l'animazione
-    shouldRasterizeIOS: true,
-    renderToHardwareTextureAndroid: true,
-  }));
-
-  const titleAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: titleTranslateY.value }],
-    opacity: fadeIn.value,
-  }));
-
-  const subtitleAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: subtitleTranslateY.value }],
-    opacity: fadeIn.value * 0.8,
-  }));
+  // Mostra loading se l'auth è in caricamento
+  if (isLoading) {
+    return (
+      <ThemedView style={styles.container}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <ThemedText style={[styles.loadingText, { color: colors.muted }]}>
+          Caricamento...
+        </ThemedText>
+      </ThemedView>
+    );
+  }
 
   return (
-    <Animated.View style={[styles.container, { backgroundColor: colors.background }, containerAnimatedStyle]}>
-      {/* Logo mascotte statico per la schermata di benvenuto */}
-      <Animated.View style={containerAnimatedStyle}>
-        <Image 
-          source={require('@/assets/images/Mascotte.png')} 
-          style={styles.mascotteLogo}
+    <ThemedView style={styles.container}>
+      {/* Logo con bordo ottagonale e ombra */}
+      <ThemedView style={styles.logoFrame}>
+        <Image
+          source={require("@/assets/images/MascotteLogo.png")}
+          style={styles.logo}
           resizeMode="contain"
-          fadeDuration={0}
-          shouldRasterizeIOS={true}
-          renderToHardwareTextureAndroid={true}
         />
-      </Animated.View>
-      
-      <Animated.View style={titleAnimatedStyle}>
-        <ThemedText type="title" style={[styles.welcomeTitle, { color: colors.text }]}>
-          Benvenuto!
-        </ThemedText>
-      </Animated.View>
-      
-      <Animated.View style={subtitleAnimatedStyle}>
-        <ThemedText type="subtitle" style={[styles.welcomeSubtitle, { color: colors.muted }]}>
-          La tua pizzeria preferita
-        </ThemedText>
-      </Animated.View>
+      </ThemedView>
 
-      {/* Effetto particelle */}
-      <ParticleEffect 
-        isActive={showParticles} 
-        duration={1500}
-        particleCount={12}
-        colors={[colors.primary, colors.secondary, colors.accent, '#FFD700', '#FF6B6B']}
-      />
-    </Animated.View>
+      {/* Testo di benvenuto */}
+      <ThemedText type="title" style={styles.welcomeText}>
+        Benvenuto!
+      </ThemedText>
+
+      {/* Sottotitolo */}
+      <ThemedText style={styles.subtitle}>La tua pizzeria preferita</ThemedText>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: "#ffeec9",
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
   },
-  mascotteLogo: {
-    width: 150, // Aumentato per migliore qualità
-    height: 150, // Aumentato per migliore qualità
-    marginBottom: 20,
-    borderRadius: 75, // Per mantenere la forma circolare
-    // Proprietà per migliorare la qualità del rendering
-    transform: [{ scale: 1 }], // Forza il rendering a scala 1:1
-    // Ombra per dare profondità e migliorare la percezione di nitidezza
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+  logoFrame: {
+    width: 320,
+    height: 320,
+    marginBottom: -20,
+    backgroundColor: "#ffeec9",
   },
-  welcomeTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
+  logo: {
+    width: "100%",
+    height: "100%",
   },
-  welcomeSubtitle: {
+  welcomeText: {
+    fontSize: 36,
+    fontWeight: "bold",
+    marginBottom: 12,
+    textAlign: "center",
+    color: "#5C4033",
+  },
+  subtitle: {
     fontSize: 18,
-    textAlign: 'center',
-    opacity: 0.8,
+    textAlign: "center",
+    color: "#5C4033",
+  },
+  loadingText: {
+    fontSize: 16,
+    marginTop: 16,
   },
 });

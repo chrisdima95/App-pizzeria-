@@ -1,58 +1,238 @@
-import { TabHeader } from '@/components/TabHeader';
-import { ThemedText } from '@/components/themed-text';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Alert, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { TabHeader } from "@/components/TabHeader";
+import { ThemedText } from "@/components/themed-text";
+import { IconSymbol } from "@/components/ui/icon-symbol";
+import { Colors } from "@/constants/theme";
+import { useAuth } from "@/contexts/AuthContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useCameraPermissions } from "expo-camera";
+import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  ActionSheetIOS,
+  Alert,
+  Image,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from "react-native";
+
+// Funzioni per salvare/caricare la foto profilo
+const saveProfileImage = async (uri: string | null, userId: string) => {
+  try {
+    if (uri) {
+      await AsyncStorage.setItem(`profile_image_${userId}`, uri);
+    } else {
+      await AsyncStorage.removeItem(`profile_image_${userId}`);
+    }
+  } catch (error) {
+    console.log("Errore nel salvare la foto profilo:", error);
+  }
+};
+
+const loadProfileImage = async (userId: string): Promise<string | null> => {
+  try {
+    return await AsyncStorage.getItem(`profile_image_${userId}`);
+  } catch (error) {
+    console.log("Errore nel caricare la foto profilo:", error);
+    return null;
+  }
+};
 
 export default function ProfiloScreen() {
   const router = useRouter();
   const { user, logout, updateUser, isAuthenticated } = useAuth();
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+  const colors = Colors[colorScheme ?? "light"];
   const cardBg = colors.card;
   const divider = colors.border;
-  const logoutBg = colorScheme === 'dark' ? colors.border : colors.background;
+  const logoutBg = colorScheme === "dark" ? colors.border : colors.background;
   const logoutBorder = colors.border;
 
   // Stati per i dati personali
   const [isEditing, setIsEditing] = useState(false);
   const [personalData, setPersonalData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
-    birthDate: user?.birthDate || ''
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    birthDate: user?.birthDate || "",
   });
+
+  // Stati per la foto profilo
+  const [profileImageUri, setProfileImageUri] = useState<string | null>(null);
+  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+  const [showImagePickerModal, setShowImagePickerModal] = useState(false);
 
   // Aggiorna i dati personali quando cambia l'utente
   React.useEffect(() => {
     setPersonalData({
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
-      email: user?.email || '',
-      birthDate: user?.birthDate || ''
+      firstName: user?.firstName || "",
+      lastName: user?.lastName || "",
+      email: user?.email || "",
+      birthDate: user?.birthDate || "",
     });
   }, [user]);
 
+  // Carica la foto profilo salvata
+  useEffect(() => {
+    const loadSavedProfileImage = async () => {
+      if (user?.id) {
+        const savedImage = await loadProfileImage(user.id);
+        setProfileImageUri(savedImage);
+      } else {
+        setProfileImageUri(null);
+      }
+    };
+    loadSavedProfileImage();
+  }, [user]);
+
+  // Funzione per assicurare i permessi della fotocamera
+  const ensureCameraPermission = useCallback(async () => {
+    if (!cameraPermission || cameraPermission.granted) return true;
+    const res = await requestCameraPermission();
+    return !!res.granted;
+  }, [cameraPermission, requestCameraPermission]);
+
+  // Funzioni ausiliarie per le azioni
+  const handleTakePhoto = useCallback(async () => {
+    if (!user) return;
+    try {
+      const hasPermission = await ensureCameraPermission();
+      if (!hasPermission) {
+        Alert.alert(
+          "Permesso fotocamera richiesto",
+          "Per scattare foto è necessario concedere l'accesso alla fotocamera."
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+      if (!result.canceled && result.assets?.[0]?.uri) {
+        setProfileImageUri(result.assets[0].uri);
+        await saveProfileImage(result.assets[0].uri, user.id);
+      }
+    } catch (error) {
+      Alert.alert("Errore", "Impossibile scattare la foto");
+    }
+  }, [user, ensureCameraPermission]);
+
+  const handleRemoveImage = useCallback(async () => {
+    if (!user) return;
+    Alert.alert(
+      "Rimuovi immagine",
+      "Sei sicuro di voler rimuovere la tua foto profilo?",
+      [
+        { text: "Annulla", style: "cancel" },
+        {
+          text: "Rimuovi",
+          onPress: async () => {
+            setProfileImageUri(null);
+            await saveProfileImage(null, user.id);
+          },
+        },
+      ]
+    );
+  }, [user]);
+
+  // Funzione per cambiare la foto profilo - usa ActionSheetIOS su iOS e Modal su Android
+  const handleChangeProfileImage = useCallback(() => {
+    if (!user) return;
+
+    if (Platform.OS === "ios") {
+      // Su iOS usa ActionSheetIOS che non ha limiti
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: [
+            "Annulla",
+            "Scegli dalla galleria",
+            "Scatta foto",
+            "Rimuovi immagine",
+          ],
+          cancelButtonIndex: 0,
+          destructiveButtonIndex: 3,
+        },
+        async (buttonIndex) => {
+          if (buttonIndex === 0) return; // Annulla
+
+          if (buttonIndex === 1) {
+            // Scegli dalla galleria
+            try {
+              const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.8,
+              });
+              if (!result.canceled && result.assets?.[0]?.uri) {
+                setProfileImageUri(result.assets[0].uri);
+                await saveProfileImage(result.assets[0].uri, user.id);
+              }
+            } catch (error) {
+              Alert.alert("Errore", "Impossibile scegliere l'immagine");
+            }
+          } else if (buttonIndex === 2) {
+            // Scatta foto
+            handleTakePhoto();
+          } else if (buttonIndex === 3) {
+            // Rimuovi immagine
+            handleRemoveImage();
+          }
+        }
+      );
+    } else {
+      // Su Android, usa un modal personalizzato
+      setShowImagePickerModal(true);
+    }
+  }, [user]);
+
+  const handlePickFromGallery = useCallback(async () => {
+    if (!user) return;
+    setShowImagePickerModal(false);
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+      if (!result.canceled && result.assets?.[0]?.uri) {
+        setProfileImageUri(result.assets[0].uri);
+        await saveProfileImage(result.assets[0].uri, user.id);
+      }
+    } catch (error) {
+      Alert.alert("Errore", "Impossibile scegliere l'immagine");
+    }
+  }, [user]);
+
   const handleLogout = () => {
-    if (Platform.OS === 'web') {
-      const confirmed = typeof window !== 'undefined' ? window.confirm('Sei sicuro di voler uscire?') : true;
+    if (Platform.OS === "web") {
+      const confirmed =
+        typeof window !== "undefined"
+          ? window.confirm("Sei sicuro di voler uscire?")
+          : true;
       if (confirmed) {
         logout();
       }
       return;
     }
 
-    Alert.alert('Logout', 'Sei sicuro di voler uscire?', [
-      { text: 'Annulla', style: 'cancel' },
-      { text: 'Esci', style: 'destructive', onPress: logout }
+    Alert.alert("Logout", "Sei sicuro di voler uscire?", [
+      { text: "Annulla", style: "cancel" },
+      { text: "Esci", style: "destructive", onPress: logout },
     ]);
   };
 
   const handleLogin = () => {
-    router.push('/login');
+    router.push("/login");
   };
 
   const handleEditToggle = () => {
@@ -60,7 +240,7 @@ export default function ProfiloScreen() {
       // Salva i dati
       updateUser(personalData);
       setIsEditing(false);
-      Alert.alert('Successo', 'Dati personali aggiornati!');
+      Alert.alert("Successo", "Dati personali aggiornati!");
     } else {
       setIsEditing(true);
     }
@@ -68,38 +248,46 @@ export default function ProfiloScreen() {
 
   const handleCancelEdit = () => {
     setPersonalData({
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
-      email: user?.email || '',
-      birthDate: user?.birthDate || ''
+      firstName: user?.firstName || "",
+      lastName: user?.lastName || "",
+      email: user?.email || "",
+      birthDate: user?.birthDate || "",
     });
     setIsEditing(false);
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setPersonalData(prev => ({
+    setPersonalData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const menuItems = [
     {
-      id: 'orders',
-      title: 'I miei ordini',
-      icon: 'bag',
-      onPress: () => router.push('/ordini')
-    }
+      id: "orders",
+      title: "I miei ordini",
+      icon: "bag",
+      onPress: () => router.push("/ordini"),
+    },
   ];
 
-  const renderMenuItem = (item: typeof menuItems[0]) => (
+  const renderMenuItem = (item: (typeof menuItems)[0]) => (
     <TouchableOpacity
       key={item.id}
-      style={[styles.menuItem, { pointerEvents: 'auto', borderBottomColor: divider }]}
+      style={[
+        styles.menuItem,
+        { pointerEvents: "auto", borderBottomColor: divider },
+      ]}
       onPress={item.onPress}
     >
       <View style={styles.menuItemContent}>
-        <IconSymbol size={24} name={item.icon as any} color={colors.primary} style={styles.menuIcon} />
+        <IconSymbol
+          size={24}
+          name={item.icon as any}
+          color={colors.primary}
+          style={styles.menuIcon}
+        />
         <ThemedText style={styles.menuTitle}>{item.title}</ThemedText>
         <IconSymbol size={16} name="chevron.right" color={colors.icon} />
       </View>
@@ -107,141 +295,239 @@ export default function ProfiloScreen() {
   );
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={styles.scrollContent}>
-      <TabHeader title="👤 Profilo" />
+    <ScrollView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      contentContainerStyle={styles.scrollContent}
+    >
+      <TabHeader title="Profilo" showMascotte={false} />
 
       {isAuthenticated ? (
         <>
           {/* User Info */}
-          <View style={[styles.userInfo, { backgroundColor: cardBg, borderColor: colors.border }]}>
-            <View style={styles.avatar}>
-              <IconSymbol size={60} name="person.circle.fill" color={colors.primary} />
-            </View>
+          <View
+            style={[
+              styles.userInfo,
+              { backgroundColor: cardBg, borderColor: colors.border },
+            ]}
+          >
+            <TouchableOpacity
+              style={styles.avatarContainer}
+              onPress={handleChangeProfileImage}
+            >
+              {profileImageUri ? (
+                <Image
+                  source={{ uri: profileImageUri }}
+                  style={styles.avatarImage}
+                />
+              ) : (
+                <IconSymbol
+                  size={60}
+                  name="person.circle.fill"
+                  color={colors.primary}
+                />
+              )}
+              <View
+                style={[
+                  styles.editIconBadge,
+                  {
+                    backgroundColor: colors.primary,
+                    borderColor: colors.background,
+                  },
+                ]}
+              >
+                <IconSymbol size={14} name="pencil" color="white" />
+              </View>
+            </TouchableOpacity>
             {Boolean(user?.name?.trim()) && (
               <ThemedText type="subtitle" style={styles.userName}>
                 {user!.name}
               </ThemedText>
             )}
-            <ThemedText style={[styles.userEmail, { color: colors.muted }]}>{user?.email || 'email@example.com'}</ThemedText>
-          </View>
-
-      {/* Dati personali */}
-      <View style={[styles.personalDataCard, { backgroundColor: cardBg, borderColor: colors.border }]}>
-        <View style={styles.personalDataHeader}>
-          <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>Dati personali</ThemedText>
-          <TouchableOpacity
-            style={[styles.editButton, { backgroundColor: colors.primary }]}
-            onPress={handleEditToggle}
-          >
-            <ThemedText style={styles.editButtonText}>
-              {isEditing ? 'Salva' : 'Modifica'}
+            <ThemedText style={[styles.userEmail, { color: colors.muted }]}>
+              {user?.email || "email@example.com"}
             </ThemedText>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.personalDataFields}>
-          <View style={styles.fieldRow}>
-            <View style={styles.fieldContainer}>
-              <ThemedText style={[styles.fieldLabel, { color: colors.muted }]}>Nome</ThemedText>
-              {isEditing ? (
-                <TextInput
-                  style={[styles.fieldInput, { 
-                    backgroundColor: colors.background, 
-                    borderColor: colors.border,
-                    color: colors.text 
-                  }]}
-                  value={personalData.firstName}
-                  onChangeText={(value) => handleInputChange('firstName', value)}
-                  placeholder="Inserisci il nome"
-                  placeholderTextColor={colors.muted}
-                />
-              ) : (
-                <ThemedText style={[styles.fieldValue, { color: colors.text }]}>
-                  {personalData.firstName || 'Non specificato'}
-                </ThemedText>
-              )}
-            </View>
-            <View style={styles.fieldContainer}>
-              <ThemedText style={[styles.fieldLabel, { color: colors.muted }]}>Cognome</ThemedText>
-              {isEditing ? (
-                <TextInput
-                  style={[styles.fieldInput, { 
-                    backgroundColor: colors.background, 
-                    borderColor: colors.border,
-                    color: colors.text 
-                  }]}
-                  value={personalData.lastName}
-                  onChangeText={(value) => handleInputChange('lastName', value)}
-                  placeholder="Inserisci il cognome"
-                  placeholderTextColor={colors.muted}
-                />
-              ) : (
-                <ThemedText style={[styles.fieldValue, { color: colors.text }]}>
-                  {personalData.lastName || 'Non specificato'}
-                </ThemedText>
-              )}
-            </View>
           </View>
 
-          <View style={styles.fieldContainer}>
-            <ThemedText style={[styles.fieldLabel, { color: colors.muted }]}>Email</ThemedText>
-            {isEditing ? (
-              <TextInput
-                style={[styles.fieldInput, { 
-                  backgroundColor: colors.background, 
-                  borderColor: colors.border,
-                  color: colors.text 
-                }]}
-                value={personalData.email}
-                onChangeText={(value) => handleInputChange('email', value)}
-                placeholder="Inserisci l'email"
-                placeholderTextColor={colors.muted}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            ) : (
-              <ThemedText style={[styles.fieldValue, { color: colors.text }]}>
-                {personalData.email || 'Non specificato'}
+          {/* Dati personali */}
+          <View
+            style={[
+              styles.personalDataCard,
+              { backgroundColor: cardBg, borderColor: colors.border },
+            ]}
+          >
+            <View style={styles.personalDataHeader}>
+              <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
+                Dati personali
               </ThemedText>
-            )}
-          </View>
-
-          <View style={styles.fieldContainer}>
-            <ThemedText style={[styles.fieldLabel, { color: colors.muted }]}>Data di nascita</ThemedText>
-            {isEditing ? (
-              <TextInput
-                style={[styles.fieldInput, { 
-                  backgroundColor: colors.background, 
-                  borderColor: colors.border,
-                  color: colors.text 
-                }]}
-                value={personalData.birthDate}
-                onChangeText={(value) => handleInputChange('birthDate', value)}
-                placeholder="GG/MM/AAAA"
-                placeholderTextColor={colors.muted}
-              />
-            ) : (
-              <ThemedText style={[styles.fieldValue, { color: colors.text }]}>
-                {personalData.birthDate || 'Non specificato'}
-              </ThemedText>
-            )}
-          </View>
-
-          {isEditing && (
-            <View style={styles.editActions}>
               <TouchableOpacity
-                style={[styles.cancelButton, { backgroundColor: colors.border }]}
-                onPress={handleCancelEdit}
+                style={[styles.editButton, { backgroundColor: colors.primary }]}
+                onPress={handleEditToggle}
               >
-                <ThemedText style={[styles.cancelButtonText, { color: colors.text }]}>Annulla</ThemedText>
+                <ThemedText style={styles.editButtonText}>
+                  {isEditing ? "Salva" : "Modifica"}
+                </ThemedText>
               </TouchableOpacity>
             </View>
-          )}
-        </View>
-      </View>
+
+            <View style={styles.personalDataFields}>
+              <View style={styles.fieldRow}>
+                <View style={styles.fieldContainer}>
+                  <ThemedText
+                    style={[styles.fieldLabel, { color: colors.muted }]}
+                  >
+                    Nome
+                  </ThemedText>
+                  {isEditing ? (
+                    <TextInput
+                      style={[
+                        styles.fieldInput,
+                        {
+                          backgroundColor: colors.background,
+                          borderColor: colors.border,
+                          color: colors.text,
+                        },
+                      ]}
+                      value={personalData.firstName}
+                      onChangeText={(value) =>
+                        handleInputChange("firstName", value)
+                      }
+                      placeholder="Inserisci il nome"
+                      placeholderTextColor={colors.muted}
+                    />
+                  ) : (
+                    <ThemedText
+                      style={[styles.fieldValue, { color: colors.text }]}
+                    >
+                      {personalData.firstName || "Non specificato"}
+                    </ThemedText>
+                  )}
+                </View>
+                <View style={styles.fieldContainer}>
+                  <ThemedText
+                    style={[styles.fieldLabel, { color: colors.muted }]}
+                  >
+                    Cognome
+                  </ThemedText>
+                  {isEditing ? (
+                    <TextInput
+                      style={[
+                        styles.fieldInput,
+                        {
+                          backgroundColor: colors.background,
+                          borderColor: colors.border,
+                          color: colors.text,
+                        },
+                      ]}
+                      value={personalData.lastName}
+                      onChangeText={(value) =>
+                        handleInputChange("lastName", value)
+                      }
+                      placeholder="Inserisci il cognome"
+                      placeholderTextColor={colors.muted}
+                    />
+                  ) : (
+                    <ThemedText
+                      style={[styles.fieldValue, { color: colors.text }]}
+                    >
+                      {personalData.lastName || "Non specificato"}
+                    </ThemedText>
+                  )}
+                </View>
+              </View>
+
+              <View style={styles.fieldContainer}>
+                <ThemedText
+                  style={[styles.fieldLabel, { color: colors.muted }]}
+                >
+                  Email
+                </ThemedText>
+                {isEditing ? (
+                  <TextInput
+                    style={[
+                      styles.fieldInput,
+                      {
+                        backgroundColor: colors.background,
+                        borderColor: colors.border,
+                        color: colors.text,
+                      },
+                    ]}
+                    value={personalData.email}
+                    onChangeText={(value) => handleInputChange("email", value)}
+                    placeholder="Inserisci l'email"
+                    placeholderTextColor={colors.muted}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                ) : (
+                  <ThemedText
+                    style={[styles.fieldValue, { color: colors.text }]}
+                  >
+                    {personalData.email || "Non specificato"}
+                  </ThemedText>
+                )}
+              </View>
+
+              <View style={styles.fieldContainer}>
+                <ThemedText
+                  style={[styles.fieldLabel, { color: colors.muted }]}
+                >
+                  Data di nascita
+                </ThemedText>
+                {isEditing ? (
+                  <TextInput
+                    style={[
+                      styles.fieldInput,
+                      {
+                        backgroundColor: colors.background,
+                        borderColor: colors.border,
+                        color: colors.text,
+                      },
+                    ]}
+                    value={personalData.birthDate}
+                    onChangeText={(value) =>
+                      handleInputChange("birthDate", value)
+                    }
+                    placeholder="GG/MM/AAAA"
+                    placeholderTextColor={colors.muted}
+                  />
+                ) : (
+                  <ThemedText
+                    style={[styles.fieldValue, { color: colors.text }]}
+                  >
+                    {personalData.birthDate || "Non specificato"}
+                  </ThemedText>
+                )}
+              </View>
+
+              {isEditing && (
+                <View style={styles.editActions}>
+                  <TouchableOpacity
+                    style={[
+                      styles.cancelButton,
+                      { backgroundColor: colors.border },
+                    ]}
+                    onPress={handleCancelEdit}
+                  >
+                    <ThemedText
+                      style={[styles.cancelButtonText, { color: colors.text }]}
+                    >
+                      Annulla
+                    </ThemedText>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </View>
 
           {/* Menu Items */}
-          <View style={[styles.menu, { backgroundColor: cardBg, borderColor: colors.border }]}>{menuItems.map(renderMenuItem)}</View>
+          <View
+            style={[
+              styles.menu,
+              { backgroundColor: cardBg, borderColor: colors.border },
+            ]}
+          >
+            {menuItems.map(renderMenuItem)}
+          </View>
 
           {/* Logout Button */}
           <View style={styles.logoutContainer}>
@@ -249,22 +535,31 @@ export default function ProfiloScreen() {
               style={[
                 styles.logoutButton,
                 {
-                  pointerEvents: 'auto',
+                  pointerEvents: "auto",
                   backgroundColor: logoutBg,
-                  borderColor: logoutBorder
-                }
+                  borderColor: logoutBorder,
+                },
               ]}
               onPress={handleLogout}
             >
               <IconSymbol size={20} name="power" color={colors.primary} />
-              <ThemedText style={[styles.logoutText, { color: colors.primary }]}>Logout</ThemedText>
+              <ThemedText
+                style={[styles.logoutText, { color: colors.primary }]}
+              >
+                Logout
+              </ThemedText>
             </TouchableOpacity>
           </View>
         </>
       ) : (
         <>
           {/* Guest User Info */}
-          <View style={[styles.userInfo, { backgroundColor: cardBg, borderColor: colors.border }]}>
+          <View
+            style={[
+              styles.userInfo,
+              { backgroundColor: cardBg, borderColor: colors.border },
+            ]}
+          >
             <View style={styles.avatar}>
               <IconSymbol size={60} name="person.circle" color={colors.muted} />
             </View>
@@ -282,47 +577,136 @@ export default function ProfiloScreen() {
               style={[
                 styles.logoutButton,
                 {
-                  pointerEvents: 'auto',
+                  pointerEvents: "auto",
                   backgroundColor: colors.primary,
-                  borderColor: colors.primary
-                }
+                  borderColor: colors.primary,
+                },
               ]}
               onPress={handleLogin}
             >
               <IconSymbol size={20} name="person.badge.plus" color="white" />
-              <ThemedText style={[styles.logoutText, { color: 'white' }]}>Accedi</ThemedText>
+              <ThemedText style={[styles.logoutText, { color: "white" }]}>
+                Accedi
+              </ThemedText>
             </TouchableOpacity>
           </View>
         </>
       )}
+
+      {/* Modal per selezionare la foto profilo su Android */}
+      <Modal
+        visible={showImagePickerModal}
+        transparent={true}
+        animationType="none"
+        onRequestClose={() => setShowImagePickerModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <TouchableOpacity
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => setShowImagePickerModal(false)}
+          />
+          <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
+            <ThemedText style={[styles.modalTitle, { color: colors.text }]}>
+              Cambia foto profilo
+            </ThemedText>
+
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: colors.primary }]}
+              onPress={handlePickFromGallery}
+            >
+              <ThemedText style={styles.modalButtonText}>
+                Scegli dalla galleria
+              </ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: colors.primary }]}
+              onPress={handleTakePhoto}
+            >
+              <ThemedText style={styles.modalButtonText}>
+                Scatta foto
+              </ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: "#E53E3E" }]}
+              onPress={handleRemoveImage}
+            >
+              <ThemedText style={styles.modalButtonText}>
+                Rimuovi immagine
+              </ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: colors.border }]}
+              onPress={() => setShowImagePickerModal(false)}
+            >
+              <ThemedText
+                style={[styles.modalButtonText, { color: colors.text }]}
+              >
+                Annulla
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { 
+  container: {
     flex: 1,
   },
   scrollContent: { paddingBottom: 40 },
   userInfo: {
-    alignItems: 'center',
+    alignItems: "center",
     padding: 30,
     margin: 20,
     borderRadius: 20,
     elevation: 4,
-    shadowColor: '#E53E3E',
+    shadowColor: "#E53E3E",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     borderWidth: 1,
   },
   avatar: { marginBottom: 16 },
-  userName: { 
-    fontSize: 22, 
-    fontWeight: '700', 
+  avatarContainer: {
+    marginBottom: 16,
+    position: "relative",
+    alignSelf: "center",
+  },
+  avatarImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: "#E53E3E",
+  },
+  editIconBadge: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+  },
+  userName: {
+    fontSize: 22,
+    fontWeight: "700",
     marginBottom: 4,
   },
-  userEmail: { 
+  userEmail: {
     fontSize: 14,
   },
   personalDataCard: {
@@ -330,42 +714,42 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     elevation: 4,
-    shadowColor: '#E53E3E',
+    shadowColor: "#E53E3E",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     borderWidth: 1,
   },
   personalDataHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   editButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 12,
     elevation: 2,
-    shadowColor: '#E53E3E',
+    shadowColor: "#E53E3E",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
   },
   editButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   personalDataFields: {
     gap: 16,
   },
   fieldRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
   },
   fieldContainer: {
@@ -373,7 +757,7 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
     marginBottom: 8,
   },
   fieldInput: {
@@ -389,8 +773,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   editActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
     marginTop: 8,
   },
   cancelButton: {
@@ -401,44 +785,86 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
   },
-  menu: { 
-    margin: 20, 
-    borderRadius: 20, 
-    overflow: 'hidden', 
+  menu: {
+    margin: 20,
+    borderRadius: 20,
+    overflow: "hidden",
     elevation: 4,
-    shadowColor: '#E53E3E',
+    shadowColor: "#E53E3E",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     borderWidth: 1,
   },
   menuItem: { borderBottomWidth: 1 },
-  menuItemContent: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    padding: 18 
+  menuItemContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 18,
   },
   menuIcon: { marginRight: 16 },
-  menuTitle: { 
-    flex: 1, 
-    fontSize: 16, 
-    fontWeight: '600',
+  menuTitle: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: "600",
   },
   logoutContainer: { padding: 20 },
   logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: 16,
     padding: 18,
     borderWidth: 1,
     gap: 10,
     elevation: 2,
   },
-  logoutText: { 
-    fontSize: 16, 
-    fontWeight: '600' 
-  }
+  logoutText: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  modalOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    paddingBottom: 40,
+    alignItems: "center",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  modalButton: {
+    width: "100%",
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    marginBottom: 12,
+    elevation: 2,
+  },
+  modalButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+  },
 });

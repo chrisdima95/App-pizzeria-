@@ -1,16 +1,16 @@
-import { ThemedText } from '@/components/themed-text';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { ThemedText } from "@/components/themed-text";
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
-    Animated,
-    Dimensions,
-    Image,
-    StyleSheet,
-    TouchableOpacity,
-    View
-} from 'react-native';
+  Animated,
+  Dimensions,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface Pizza {
   id: string;
@@ -20,7 +20,7 @@ interface Pizza {
   image: string;
   ingredients: string[];
   fullDescription: string;
-  category: 'rosse' | 'bianche' | 'speciali';
+  category: "rosse" | "bianche" | "speciali";
   nutrition: {
     calories: string;
     carbs: string;
@@ -33,30 +33,32 @@ interface ChefRecommendationProps {
   pizza: Pizza;
 }
 
-export const ChefRecommendation: React.FC<ChefRecommendationProps> = ({ pizza }) => {
+export const ChefRecommendation: React.FC<ChefRecommendationProps> = ({
+  pizza,
+}) => {
   const router = useRouter();
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-  
+  const colors = Colors[colorScheme ?? "light"];
+
   // Animazioni
   const [mascotteOpacity] = useState(new Animated.Value(0));
   const [mascotteScale] = useState(new Animated.Value(0.5));
   const [textOpacity] = useState(new Animated.Value(0));
   const [textTranslateX] = useState(new Animated.Value(-50));
-  
+
   // Testo dinamico
-  const [displayedText, setDisplayedText] = useState('');
+  const [displayedText, setDisplayedText] = useState("");
   const [isTextComplete, setIsTextComplete] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
-  
+
   const fullText = `Il nostro chef consiglia: ${pizza.name} - ${pizza.description}`;
-  
+
   // Animazione di apparizione della mascotte
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsAnimating(true);
-      
+
       // Prima appare la mascotte
       Animated.parallel([
         Animated.timing(mascotteOpacity, {
@@ -77,10 +79,10 @@ export const ChefRecommendation: React.FC<ChefRecommendationProps> = ({ pizza })
         }, 500);
       });
     }, 2500); // Delay aumentato a 2.5 secondi per permettere all'animazione del carrello di completarsi
-    
+
     return () => clearTimeout(timer);
   }, []);
-  
+
   // Animazione del testo carattere per carattere
   const animateText = () => {
     Animated.parallel([
@@ -95,7 +97,7 @@ export const ChefRecommendation: React.FC<ChefRecommendationProps> = ({ pizza })
         useNativeDriver: true,
       }),
     ]).start();
-    
+
     let currentIndex = 0;
     const textInterval = setInterval(() => {
       if (currentIndex <= fullText.length) {
@@ -107,16 +109,16 @@ export const ChefRecommendation: React.FC<ChefRecommendationProps> = ({ pizza })
       }
     }, 50); // Velocità di scrittura: 50ms per carattere
   };
-  
+
   const handleClose = () => {
     setIsVisible(false);
   };
 
   const handlePress = () => {
     if (!isTextComplete) return;
-    
+
     router.push({
-      pathname: '/pizza-details',
+      pathname: "/pizza-details",
       params: {
         id: pizza.id,
         name: pizza.name,
@@ -125,71 +127,81 @@ export const ChefRecommendation: React.FC<ChefRecommendationProps> = ({ pizza })
         fullDescription: pizza.fullDescription,
         ingredients: JSON.stringify(pizza.ingredients),
         nutrition: JSON.stringify(pizza.nutrition),
-        image: pizza.image
-      }
+        image: pizza.image,
+      },
     });
   };
-  
+
   if (!isAnimating || !isVisible) return null;
-  
+
   return (
     <View style={styles.container}>
-      <Animated.View 
+      <Animated.View
         style={[
           styles.contentContainer,
           {
             opacity: mascotteOpacity,
-            transform: [{ scale: mascotteScale }]
-          }
+            transform: [{ scale: mascotteScale }],
+          },
         ]}
       >
-        <Image 
-          source={require('@/assets/images/Mascotte.png')} 
+        <Image
+          source={require("@/assets/images/Mascotte.png")}
           style={styles.mascotteImage}
           resizeMode="cover"
         />
-        
-        <Animated.View 
+
+        <Animated.View
           style={[
             styles.textContainer,
             {
               backgroundColor: colors.card,
               borderColor: colors.primary,
               opacity: textOpacity,
-              transform: [{ translateX: textTranslateX }]
-            }
+              transform: [{ translateX: textTranslateX }],
+            },
           ]}
         >
           {/* Pulsante di chiusura */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[
-              styles.closeButton, 
-              { 
-                backgroundColor: colors.background, 
+              styles.closeButton,
+              {
+                backgroundColor: colors.background,
                 borderColor: colors.primary,
-                opacity: isTextComplete ? 1 : 0
-              }
+                opacity: isTextComplete ? 1 : 0,
+              },
             ]}
             onPress={handleClose}
             activeOpacity={0.7}
             disabled={!isTextComplete}
           >
-            <ThemedText style={[styles.closeButtonText, { color: colors.text }]}>×</ThemedText>
+            <ThemedText
+              style={[styles.closeButtonText, { color: colors.text }]}
+            >
+              ×
+            </ThemedText>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={[
-              { 
-                opacity: isTextComplete ? 1 : 0.7
-              }
+              {
+                opacity: isTextComplete ? 1 : 0.7,
+              },
             ]}
             onPress={handlePress}
             disabled={!isTextComplete}
             activeOpacity={0.8}
           >
-            <ThemedText style={[styles.recommendationText, { color: colors.text }]}>
+            <ThemedText
+              style={[styles.recommendationText, { color: colors.text }]}
+            >
               {displayedText}
-              {!isTextComplete && <ThemedText style={[styles.cursor, { color: colors.primary }]}>|</ThemedText>}
+              {!isTextComplete && (
+                <ThemedText style={[styles.cursor, { color: colors.primary }]}>
+                  |
+                </ThemedText>
+              )}
             </ThemedText>
           </TouchableOpacity>
         </Animated.View>
@@ -198,42 +210,36 @@ export const ChefRecommendation: React.FC<ChefRecommendationProps> = ({ pizza })
   );
 };
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 30, // Spostato un po' più sopra per dare più spazio
-    left: 20, // Spostato a sinistra
-    zIndex: 1001, // ZIndex più alto del pulsante carrello (1000)
+    left: 30, // Spostato a destra
+    zIndex: 1000, // Container del modale
   },
   contentContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end', // Allinea in basso per sovrapposizione
-    position: 'relative',
+    flexDirection: "row",
+    alignItems: "flex-end", // Allinea in basso per sovrapposizione
+    position: "relative",
   },
   mascotteImage: {
-    width: 80, // Ridotto per adattarsi meglio in basso
-    height: 80,
-    borderRadius: 40,
+    width: 120, // Ingrandita del 50%
+    height: 120,
+    borderRadius: 60,
     // Posizionamento per essere attaccato ai bordi della modale
-    position: 'absolute',
-    left: -15, // Sporge dalla modale verso sinistra
-    bottom: -5, // Sporge dalla modale verso il basso
-    zIndex: 1002, // Sopra la modale e tutto il resto
+    position: "absolute",
+    left: -20, // Sporge dalla modale verso sinistra
+    bottom: -8, // Sporge dalla modale verso il basso
+    zIndex: 10, // Sopra la modale
     // Ritaglio per mostrare solo la parte dello chef
-    marginTop: -5, // Sposta verso l'alto per mostrare la parte superiore
-    marginLeft: -5, // Centra meglio l'immagine
-    // Ombra per dare profondità
-    elevation: 8,
-    shadowColor: '#E53E3E',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    marginTop: -8, // Sposta verso l'alto per mostrare la parte superiore
+    marginLeft: -8, // Centra meglio l'immagine
   },
   textContainer: {
     maxWidth: screenWidth * 0.7, // Aumentato per bilanciare con la posizione
-    marginLeft: 25, // Spazio per la mascotte sovrapposta
+    marginLeft: 60, // Spazio per la mascotte più grande
     borderRadius: 20,
     borderWidth: 2,
     paddingHorizontal: 16,
@@ -242,21 +248,21 @@ const styles = StyleSheet.create({
     paddingRight: 40, // Spazio extra per il pulsante di chiusura
     // Ombra per la modale
     elevation: 4,
-    shadowColor: '#E53E3E',
+    shadowColor: "#E53E3E",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
-    position: 'relative', // Per posizionare il pulsante di chiusura
+    position: "relative", // Per posizionare il pulsante di chiusura
   },
   closeButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 8,
     right: 8,
     width: 24,
     height: 24,
     borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 1,
     elevation: 2,
     shadowOffset: { width: 0, height: 1 },
@@ -266,7 +272,7 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     lineHeight: 16,
   },
   textBubble: {
@@ -274,12 +280,12 @@ const styles = StyleSheet.create({
   },
   recommendationText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     lineHeight: 20,
-    flexWrap: 'wrap', // Permette al testo di andare a capo
+    flexWrap: "wrap", // Permette al testo di andare a capo
     flex: 1, // Occupa tutto lo spazio disponibile
   },
   cursor: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });

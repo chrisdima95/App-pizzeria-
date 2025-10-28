@@ -1,6 +1,12 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { useAuth } from './AuthContext';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { useAuth } from "./AuthContext";
 
 // Aggiungiamo il campo status
 export interface OrderItem {
@@ -8,14 +14,16 @@ export interface OrderItem {
   name: string;
   price: number;
   quantity: number;
-  status: 'pending' | 'preparing' | 'ready' | 'delivered'; // status possibile
+  status: "pending" | "preparing" | "ready" | "delivered"; // status possibile
+  notes?: string; // Note speciali per l'ordine
 }
 
 interface OrderContextType {
   orders: OrderItem[];
-  completedOrders: OrderItem[][]; // lista di ordini confermati (ogni elemento è uno "snapshot" del carrello)
+  completedOrders: OrderItem[][]; // listaรักษ์ ordini confermati (ogni elemento è uno "snapshot" del carrello)
   redeemedOffers: string[]; // lista degli ID delle offerte riscattate
-  addToOrder: (item: Omit<OrderItem, 'status'>) => void; // non serve specificare lo status quando si aggiunge
+  setOrders: React.Dispatch<React.SetStateAction<OrderItem[]>>; // per gestione diretta degli ordini
+  addToOrder: (item: Omit<OrderItem, "status">) => void; // non serve specificare lo status quando si aggiunge
   updateQuantity: (id: string, quantity: number) => void; // aggiorna la quantità di un ordine
   removeFromOrder: (id: string) => void; // rimuove completamente un ordine
   clearOrder: () => void;
@@ -34,7 +42,7 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
   const getUserStorageKeys = (userId: string) => ({
     orders: `orders_${userId}`,
     ordersHistory: `ordersHistory_${userId}`,
-    redeemedOffers: `redeemedOffers_${userId}`
+    redeemedOffers: `redeemedOffers_${userId}`,
   });
 
   // Carica ordini e storico all'avvio o quando cambia l'utente
@@ -49,13 +57,17 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
       }
 
       try {
-        const { orders: ordersKey, ordersHistory: historyKey, redeemedOffers: offersKey } = getUserStorageKeys(user.id);
+        const {
+          orders: ordersKey,
+          ordersHistory: historyKey,
+          redeemedOffers: offersKey,
+        } = getUserStorageKeys(user.id);
         const [ordersJson, historyJson, offersJson] = await Promise.all([
           AsyncStorage.getItem(ordersKey),
           AsyncStorage.getItem(historyKey),
           AsyncStorage.getItem(offersKey),
         ]);
-        
+
         if (ordersJson) {
           const parsed: OrderItem[] = JSON.parse(ordersJson);
           if (Array.isArray(parsed)) {
@@ -64,7 +76,7 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
         } else {
           setOrders([]);
         }
-        
+
         if (historyJson) {
           const parsedHistory: OrderItem[][] = JSON.parse(historyJson);
           if (Array.isArray(parsedHistory)) {
@@ -73,7 +85,7 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
         } else {
           setCompletedOrders([]);
         }
-        
+
         if (offersJson) {
           const parsedOffers: string[] = JSON.parse(offersJson);
           if (Array.isArray(parsedOffers)) {
@@ -83,7 +95,7 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
           setRedeemedOffers([]);
         }
       } catch (e) {
-        console.error('Errore nel caricamento ordini da AsyncStorage', e);
+        console.error("Errore nel caricamento ordini da AsyncStorage", e);
         setOrders([]);
         setCompletedOrders([]);
         setRedeemedOffers([]);
@@ -96,12 +108,12 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const persistOrders = async () => {
       if (!isAuthenticated || !user) return;
-      
+
       try {
         const { orders: ordersKey } = getUserStorageKeys(user.id);
         await AsyncStorage.setItem(ordersKey, JSON.stringify(orders));
       } catch (e) {
-        console.error('Errore nel salvataggio ordini su AsyncStorage', e);
+        console.error("Errore nel salvataggio ordini su AsyncStorage", e);
       }
     };
     persistOrders();
@@ -111,12 +123,15 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const persistHistory = async () => {
       if (!isAuthenticated || !user) return;
-      
+
       try {
         const { ordersHistory: historyKey } = getUserStorageKeys(user.id);
         await AsyncStorage.setItem(historyKey, JSON.stringify(completedOrders));
       } catch (e) {
-        console.error('Errore nel salvataggio storico ordini su AsyncStorage', e);
+        console.error(
+          "Errore nel salvataggio storico ordini su AsyncStorage",
+          e
+        );
       }
     };
     persistHistory();
@@ -126,30 +141,31 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const persistRedeemedOffers = async () => {
       if (!isAuthenticated || !user) return;
-      
+
       try {
         const { redeemedOffers: offersKey } = getUserStorageKeys(user.id);
         await AsyncStorage.setItem(offersKey, JSON.stringify(redeemedOffers));
       } catch (e) {
-        console.error('Errore nel salvataggio offerte riscattate su AsyncStorage', e);
+        console.error(
+          "Errore nel salvataggio offerte riscattate su AsyncStorage",
+          e
+        );
       }
     };
     persistRedeemedOffers();
   }, [redeemedOffers, user, isAuthenticated]);
 
-  const addToOrder = (item: Omit<OrderItem, 'status'>) => {
+  const addToOrder = (item: Omit<OrderItem, "status">) => {
     setOrders((prev) => {
       const existing = prev.find((o) => o.id === item.id);
       if (existing) {
         // Se esiste già, aumenta solo la quantità
         return prev.map((o) =>
-          o.id === item.id
-            ? { ...o, quantity: o.quantity + item.quantity }
-            : o
+          o.id === item.id ? { ...o, quantity: o.quantity + item.quantity } : o
         );
       }
       // Aggiunge il nuovo ordine con status 'pending'
-      return [...prev, { ...item, status: 'pending' }];
+      return [...prev, { ...item, status: "pending" }];
     });
   };
 
@@ -158,11 +174,9 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
       removeFromOrder(id);
       return;
     }
-    
+
     setOrders((prev) =>
-      prev.map((o) =>
-        o.id === id ? { ...o, quantity } : o
-      )
+      prev.map((o) => (o.id === id ? { ...o, quantity } : o))
     );
   };
 
@@ -174,17 +188,19 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
 
   const confirmOrder = async () => {
     if (!orders.length) return;
-    
+
     // Identifica le offerte nell'ordine corrente
-    const offerIds = ['o1', 'o2', 'o3', 'o4']; // ID delle offerte disponibili
-    const offersInOrder = orders.filter(order => offerIds.includes(order.id));
-    
+    const offerIds = ["o1", "o2", "o3", "o4"]; // ID delle offerte disponibili
+    const offersInOrder = orders.filter((order) => offerIds.includes(order.id));
+
     // Aggiunge le offerte riscattate alla lista
     if (offersInOrder.length > 0) {
-      const newRedeemedOffers = offersInOrder.map(offer => offer.id);
-      setRedeemedOffers(prev => [...new Set([...prev, ...newRedeemedOffers])]);
+      const newRedeemedOffers = offersInOrder.map((offer) => offer.id);
+      setRedeemedOffers((prev) => [
+        ...new Set([...prev, ...newRedeemedOffers]),
+      ]);
     }
-    
+
     // aggiunge lo snapshot corrente degli ordini nello storico
     setCompletedOrders((prev) => [...prev, orders.map((o) => ({ ...o }))]);
     // svuota il carrello
@@ -192,7 +208,19 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <OrderContext.Provider value={{ orders, completedOrders, redeemedOffers, addToOrder, updateQuantity, removeFromOrder, clearOrder, confirmOrder }}>
+    <OrderContext.Provider
+      value={{
+        orders,
+        completedOrders,
+        redeemedOffers,
+        setOrders,
+        addToOrder,
+        updateQuantity,
+        removeFromOrder,
+        clearOrder,
+        confirmOrder,
+      }}
+    >
       {children}
     </OrderContext.Provider>
   );
@@ -201,7 +229,7 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
 export const useOrder = () => {
   const context = useContext(OrderContext);
   if (!context) {
-    throw new Error('useOrder must be used within an OrderProvider');
+    throw new Error("useOrder must be used within an OrderProvider");
   }
   return context;
 };
