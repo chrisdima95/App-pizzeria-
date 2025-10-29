@@ -7,12 +7,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { getAllOffers } from "@/data/offers";
 import { usePizzaModal } from "@/hooks/use-pizza-modal";
 import { useRouter } from "expo-router";
-import React from "react";
 import {
-  ScrollView,
-  StyleSheet,
-  useColorScheme,
-  View
+    ScrollView,
+    StyleSheet,
+    useColorScheme,
+    View
 } from "react-native";
 import { useOrder } from "../../contexts/OrderContext";
 
@@ -114,7 +113,7 @@ export default function OfferteScreen() {
             Pronto a vincere?
           </ThemedText>
           <ThemedText style={[styles.ctaText, { color: colors.muted }]}>
-            Swipa sulla ruota o premi il pulsante per iniziare il gioco. La fortuna è dalla tua parte!
+            Premi il pulsante per iniziare il gioco. La fortuna è dalla tua parte!
           </ThemedText>
         </View>
 
@@ -124,7 +123,7 @@ export default function OfferteScreen() {
             Come Funziona
           </ThemedText>
           <ThemedText style={[styles.footerText, { color: colors.muted }]}>
-            • Swipa sulla ruota o premi &quot;Gira la ruota!&quot; per iniziare{'\n'}
+            • Premi &quot;Gira la ruota!&quot; per iniziare{'\n'}
             • La ruota gira per esattamente 5 secondi{'\n'}
             • Ogni offerta può essere riscattata una sola volta{'\n'}
             • Registrati per riscattare le offerte vinte{'\n'}
