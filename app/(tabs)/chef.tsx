@@ -114,7 +114,7 @@ export default function ChefScreen() {
             type="title"
             style={[styles.title, { color: colors.text }]}
           >
-            Area Chef
+            Chef
           </ThemedText>
           <ThemedText
             type="subtitle"
