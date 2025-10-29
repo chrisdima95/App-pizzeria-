@@ -1,6 +1,6 @@
 // Import immagine con require per compatibilità Android
 // (gli import default di asset possono dare problemi con Metro su alcune piattaforme)
-const RuotaImage = require("@/assets/images/Ruota.png");
+const RuotaImage = require("@/assets/images/ruota.png");
 import { ThemedText } from "@/components/themed-text";
 import { Colors } from "@/constants/theme";
 import { usePizzaModal } from "@/hooks/use-pizza-modal";
@@ -96,8 +96,12 @@ export function PizzaWheel({
   };
 
   const showOfferResult = (offer: Offer) => {
-    const message = `Offerta selezionata: ${offer.name}\n\nPrezzo scontato: €${offer.price.toFixed(2)}${
-      offer.originalPrice ? ` (risparmi €${(offer.originalPrice - offer.price).toFixed(2)})` : ""
+    const message = `Offerta selezionata: ${
+      offer.name
+    }\n\nPrezzo scontato: €${offer.price.toFixed(2)}${
+      offer.originalPrice
+        ? ` (risparmi €${(offer.originalPrice - offer.price).toFixed(2)})`
+        : ""
     }\n\n${offer.description}`;
 
     showModal("Offerta Speciale!", message, [
