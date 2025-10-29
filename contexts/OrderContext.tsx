@@ -15,7 +15,7 @@ export interface OrderItem {
   name: string;
   price: number;
   quantity: number;
-  status: "pending" | "preparing" | "ready" | "delivered" | "completed"; // status possibile
+  status: "pending" | "completed"; // Stati ordine: in attesa o completato
   notes?: string; // Note speciali per l'ordine
   userEmail?: string; // Email dell'utente che ha effettuato l'ordine
 }

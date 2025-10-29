@@ -21,7 +21,7 @@ interface OrderGroup {
     name: string;
     price: number;
     quantity: number;
-    status: "pending" | "confirmed" | "preparing" | "ready" | "delivered";
+    status: "pending" | "completed";
   }[];
   date: string;
   total: number;

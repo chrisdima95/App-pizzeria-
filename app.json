@@ -41,12 +41,6 @@
         {
           "cameraPermission": "Permettere l'accesso alla fotocamera per scattare foto."
         }
-      ],
-      [
-        "expo-location",
-        {
-          "locationAlwaysAndWhenInUsePermission": "Permettere l'accesso alla posizione per mostrare la tua ubicazione sulla mappa."
-        }
       ]
     ],
     "experiments": {
