@@ -2,14 +2,14 @@ import { ThemedText } from "@/components/themed-text";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-    Animated,
-    Dimensions,
-    Image,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  Animated,
+  Dimensions,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 interface Pizza {
@@ -33,9 +33,9 @@ interface ChefRecommendationProps {
   pizza: Pizza;
 }
 
-export const ChefRecommendation: React.FC<ChefRecommendationProps> = ({
+export function ChefRecommendation({
   pizza,
-}) => {
+}: ChefRecommendationProps) {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
@@ -53,6 +53,33 @@ export const ChefRecommendation: React.FC<ChefRecommendationProps> = ({
   const [isVisible, setIsVisible] = useState(true);
 
   const fullText = `Il nostro chef consiglia: ${pizza.name} - ${pizza.description}`;
+
+  // Animazione del testo carattere per carattere
+  const animateText = useCallback(() => {
+    Animated.parallel([
+      Animated.timing(textOpacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(textTranslateX, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    let currentIndex = 0;
+    const textInterval = setInterval(() => {
+      if (currentIndex <= fullText.length) {
+        setDisplayedText(fullText.slice(0, currentIndex));
+        currentIndex++;
+      } else {
+        clearInterval(textInterval);
+        setIsTextComplete(true);
+      }
+    }, 50); // Velocità di scrittura: 50ms per carattere
+  }, [fullText, textOpacity, textTranslateX]);
 
   // Animazione di apparizione della mascotte
   useEffect(() => {
@@ -81,34 +108,9 @@ export const ChefRecommendation: React.FC<ChefRecommendationProps> = ({
     }, 2500); // Delay aumentato a 2.5 secondi per permettere all'animazione del carrello di completarsi
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [animateText, mascotteOpacity, mascotteScale]);
 
-  // Animazione del testo carattere per carattere
-  const animateText = () => {
-    Animated.parallel([
-      Animated.timing(textOpacity, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(textTranslateX, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    let currentIndex = 0;
-    const textInterval = setInterval(() => {
-      if (currentIndex <= fullText.length) {
-        setDisplayedText(fullText.slice(0, currentIndex));
-        currentIndex++;
-      } else {
-        clearInterval(textInterval);
-        setIsTextComplete(true);
-      }
-    }, 50); // Velocità di scrittura: 50ms per carattere
-  };
+  
 
   const handleClose = () => {
     setIsVisible(false);
@@ -208,9 +210,9 @@ export const ChefRecommendation: React.FC<ChefRecommendationProps> = ({
       </Animated.View>
     </View>
   );
-};
+}
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+const { width: screenWidth } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   container: {

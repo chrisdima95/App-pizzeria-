@@ -4,18 +4,18 @@ import { Colors } from "@/constants/theme";
 import { useOrder } from "@/contexts/OrderContext";
 import { usePizzaModal } from "@/hooks/use-pizza-modal";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
-    Animated,
-    Dimensions,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Switch,
-    TextInput,
-    TouchableOpacity,
-    useColorScheme,
-    View
+  Animated,
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  TextInput,
+  TouchableOpacity,
+  useColorScheme,
+  View
 } from "react-native";
 
 // Interfaccia per le personalizzazioni
@@ -29,7 +29,7 @@ interface Customization {
 export default function PizzaDetailsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { addToOrder, orders, updateQuantity, setOrders } = useOrder();
+  const { setOrders } = useOrder();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
   const { showModal, ModalComponent } = usePizzaModal();

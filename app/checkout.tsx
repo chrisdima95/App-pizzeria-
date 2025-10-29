@@ -16,26 +16,6 @@ import {
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 
-// Array delle pizze per ottenere le immagini
-const pizzas = [
-  { id: "1", name: "Pizza Margherita", image: "🍕" },
-  { id: "2", name: "Pizza Quattro Stagioni", image: "🍕" },
-  { id: "3", name: "Pizza Diavola", image: "🍕" },
-  { id: "4", name: "Pizza Capricciosa", image: "🍕" },
-  { id: "5", name: "Pizza Marinara", image: "🍕" },
-  { id: "6", name: "Pizza Bufala", image: "🍕" },
-  { id: "7", name: "Pizza Prosciutto e Funghi", image: "🍕" },
-  { id: "8", name: "Pizza Quattro Formaggi", image: "🍕" },
-  { id: "9", name: "Pizza Ortolana", image: "🍕" },
-  { id: "10", name: "Pizza Bresaola e Rucola", image: "🍕" },
-  { id: "11", name: "Pizza Tonno e Cipolle", image: "🍕" },
-  { id: "12", name: "Pizza Salsiccia e Friarielli", image: "🍕" },
-  { id: "13", name: "Pizza Patate e Salsiccia", image: "🍕" },
-  { id: "14", name: "Pizza Parma e Rucola", image: "🍕" },
-  { id: "15", name: "Pizza Tartufo e Porcini", image: "🍕" },
-  { id: "16", name: "Pizza Gamberi e Zucchine", image: "🍕" },
-  { id: "17", name: "Pizza Speck e Asiago", image: "🍕" },
-];
 
 export default function CheckoutScreen() {
   const router = useRouter();
@@ -52,11 +32,7 @@ export default function CheckoutScreen() {
     0
   );
 
-  // Funzione per ottenere l'immagine della pizza
-  const getPizzaImage = (pizzaId: string) => {
-    const pizza = pizzas.find((p) => p.id === pizzaId);
-    return pizza ? pizza.image : "🍕";
-  };
+  //
 
   const handleConfirmOrder = () => {
     if (!orders || orders.length === 0) {

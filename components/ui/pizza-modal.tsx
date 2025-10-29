@@ -1,15 +1,15 @@
 import { ThemedText } from "@/components/themed-text";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import {
-    Animated,
-    Image,
-    Modal,
-    Pressable,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  Animated,
+  Image,
+  Modal,
+  Pressable,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export interface PizzaModalButton {
@@ -26,13 +26,13 @@ interface PizzaModalProps {
   onClose?: () => void;
 }
 
-export const PizzaModal: React.FC<PizzaModalProps> = ({
+export function PizzaModal({
   visible,
   title,
   message,
   buttons = [{ text: "OK" }],
   onClose,
-}) => {
+}: PizzaModalProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -197,7 +197,7 @@ export const PizzaModal: React.FC<PizzaModalProps> = ({
       </Pressable>
     </Modal>
   );
-};
+}
 
 const styles = StyleSheet.create({
   backdrop: {

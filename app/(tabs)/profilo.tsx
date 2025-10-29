@@ -10,17 +10,17 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-    ActionSheetIOS,
-    Alert,
-    Image,
-    Modal,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    useColorScheme,
-    View,
+  ActionSheetIOS,
+  Alert,
+  Image,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  useColorScheme,
+  View,
 } from "react-native";
 
 // Funzioni per salvare/caricare la foto profilo
@@ -53,7 +53,6 @@ export default function ProfiloScreen() {
   const { showModal, ModalComponent } = usePizzaModal();
   const cardBg = colors.card;
   const divider = colors.border;
-  const logoutBg = colorScheme === "dark" ? colors.border : colors.background;
   const logoutBorder = colors.border;
 
   // Stati per i dati personali
@@ -122,7 +121,7 @@ export default function ProfiloScreen() {
         setProfileImageUri(result.assets[0].uri);
         await saveProfileImage(result.assets[0].uri, user.id);
       }
-    } catch (error) {
+    } catch {
       Alert.alert("Errore", "Impossibile scattare la foto");
     }
   }, [user, ensureCameraPermission]);
@@ -178,7 +177,7 @@ export default function ProfiloScreen() {
                 setProfileImageUri(result.assets[0].uri);
                 await saveProfileImage(result.assets[0].uri, user.id);
               }
-            } catch (error) {
+            } catch {
               Alert.alert("Errore", "Impossibile scegliere l'immagine");
             }
           } else if (buttonIndex === 2) {
@@ -194,7 +193,7 @@ export default function ProfiloScreen() {
       // Su Android, usa un modal personalizzato
       setShowImagePickerModal(true);
     }
-  }, [user]);
+  }, [user, handleTakePhoto, handleRemoveImage]);
 
   const handlePickFromGallery = useCallback(async () => {
     if (!user) return;
@@ -210,7 +209,7 @@ export default function ProfiloScreen() {
         setProfileImageUri(result.assets[0].uri);
         await saveProfileImage(result.assets[0].uri, user.id);
       }
-    } catch (error) {
+    } catch {
       Alert.alert("Errore", "Impossibile scegliere l'immagine");
     }
   }, [user]);

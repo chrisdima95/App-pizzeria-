@@ -2,14 +2,14 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/contexts/AuthContext';
 import { router } from 'expo-router';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet } from 'react-native';
 
 interface AuthGuardProps {
   children: React.ReactNode;
 }
 
-export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
+export function AuthGuard({ children }: AuthGuardProps) {
   const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   }
 
   return <>{children}</>;
-};
+}
 
 const styles = StyleSheet.create({
   loadingContainer: {

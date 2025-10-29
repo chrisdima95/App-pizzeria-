@@ -8,11 +8,11 @@ import * as Clipboard from "expo-clipboard";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    ScrollView,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
 } from "react-native";
 
 export default function ChefScreen() {
@@ -94,7 +94,7 @@ export default function ChefScreen() {
         showModal("Errore", "Credenziali Chef non valide");
       }
       // Il redirect viene gestito automaticamente dal chefLogin
-    } catch (error) {
+    } catch {
       showModal("Errore", "Si è verificato un errore durante il login Chef");
     } finally {
       setIsLoading(false);

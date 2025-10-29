@@ -1,7 +1,6 @@
 import { ThemedText } from "@/components/themed-text";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import React from "react";
 import { Image, StyleSheet, View } from "react-native";
 
 interface TabHeaderProps {
@@ -10,11 +9,11 @@ interface TabHeaderProps {
   showMascotte?: boolean;
 }
 
-export const TabHeader: React.FC<TabHeaderProps> = ({
+export function TabHeader({
   title,
   subtitle,
   showMascotte = true,
-}) => {
+}: TabHeaderProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
 
@@ -51,7 +50,7 @@ export const TabHeader: React.FC<TabHeaderProps> = ({
       )}
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {

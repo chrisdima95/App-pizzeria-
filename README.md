@@ -134,10 +134,7 @@ Schermata login chef che permette:
 
 #### `app/(modals)/` - Modals
 
-Directory per modals dell'applicazione.
-
-##### `app/(modals)/nuovo-indirizzo.tsx`
-Modal per aggiungere un nuovo indirizzo di consegna.
+Directory per modals dell'applicazione (attualmente senza modali specifici).
 
 ---
 
@@ -236,23 +233,27 @@ Gestione dello stato globale dell'applicazione tramite React Context API.
 
 #### `contexts/AuthContext.tsx`
 Context per la gestione dell'autenticazione che fornisce:
-- Stato utente e chef separati
-- Funzioni login/logout per utenti normali e chef
-- Registrazione nuovi utenti
-- Aggiornamento dati profilo
-- Persistenza sessioni con AsyncStorage
-- Callback per reset ruota e logout
+- Stato utente e chef separati (`user`, `chef`)
+- Stati di autenticazione (`isLoading`, `isAuthenticated`, `isChefAuthenticated`)
+- Funzioni login/logout per utenti normali (`login`, `logout`) e chef (`chefLogin`, `chefLogout`)
+- Registrazione nuovi utenti (`register`)
+- Aggiornamento dati utente (`updateUser`)
+- Persistenza sessioni con AsyncStorage (chiavi: `user`, `authToken`, `chef`, `chefToken`)
+- Callback per reset ruota e logout (`registerResetCallback`, `registerLogoutCallback`)
 
 #### `contexts/OrderContext.tsx`
 Context per la gestione degli ordini che gestisce:
-- Carrello corrente (ordini in attesa)
-- Storico ordini completati
-- Offerte riscattate
-- Timestamp ultimo utilizzo ruota (per cooldown)
-- Funzioni per aggiungere/rimuovere/modificare ordini
-- Conferma ordine (per utenti loggati e ospiti)
-- Persistenza dati per utente con AsyncStorage
-- Ordini globali per il chef
+- Carrello corrente (`orders`: array ordini in attesa)
+- Storico ordini completati (`completedOrders`: array di array)
+- Offerte riscattate (`redeemedOffers`: array di ID)
+- Timestamp ultimo utilizzo ruota (`lastWheelSpinTimestamp`: per cooldown)
+- Flag presenza offerte nel carrello (`hasOfferInCart`)
+- Funzioni per aggiungere/rimuovere/modificare ordini (`addToOrder`, `removeFromOrder`, `updateQuantity`, `clearOrder`)
+- Conferma ordine (`confirmOrder` per utenti autenticati, `confirmOrderAsGuest` per ospiti)
+- Reset cooldown ruota (`resetWheelCooldown`)
+- Ordini globali per chef (`getAllOrders`)
+- Persistenza dati per utente con AsyncStorage (chiavi: `orders_{userId}`, `ordersHistory_{userId}`, `redeemedOffers_{userId}`, `lastWheelSpin_{userId}`)
+- Ordini globali salvati in `globalOrders` (tutti gli ordini di tutti gli utenti e ospiti)
 
 ---
 
@@ -263,19 +264,31 @@ Contiene i file JSON e i dati statici dell'applicazione.
 #### `data/pizzas.json`
 File JSON con il catalogo completo delle pizze contenente:
 - 18 pizze diverse con dettagli completi
-- Informazioni per ogni pizza: ID, nome, prezzo, descrizione, immagine
-- Ingredienti, descrizione completa, categoria (rosse/bianche/speciali)
-- Valori nutrizionali (calorie, carboidrati, proteine, grassi)
+- Informazioni per ogni pizza:
+  - `id`: ID univoco (stringa)
+  - `name`: Nome pizza
+  - `price`: Prezzo (stringa, es. "8.50")
+  - `description`: Descrizione breve
+  - `image`: URL immagine
+  - `ingredients`: Array di ingredienti (stringa[])
+  - `fullDescription`: Descrizione completa
+  - `category`: Categoria (rosse/bianche/speciali)
+  - `nutrition`: Oggetto valori nutrizionali (calorie, carbs, protein, fat come stringhe, es. "250 kcal", "30g")
 
 #### `data/offers.tsx`
-File TypeScript che contiene tutte le offerte della ruota organizzate per:
-- **Kids (5-12 anni)**: Offerte per bambini
-- **Teens (13-25 anni)**: Offerte per studenti
-- **Adults (26-50 anni)**: Offerte per professionisti
-- **Seniors (50+)**: Offerte per senior
-- **Family**: Offerte famiglia
-- **Gourmet**: Offerte gourmet per appassionati
-Ogni categoria ha 4 offerte specifiche con sconti e descrizioni.
+File TypeScript che contiene tutte le offerte della ruota fortuna:
+- Array `wheelOffers` con 12 offerte di pizze
+- Organizzate per categoria pizza:
+  - **classic**: Pizze classiche (Margherita, Quattro Stagioni, Capricciosa, Prosciutto e Funghi)
+  - **spicy**: Pizze piccanti (Diavola)
+  - **vegan**: Pizze vegane (Marinara)
+  - **premium**: Pizze premium (Bufala, Bresaola e Rucola)
+  - **cheese**: Pizze ai formaggi (Quattro Formaggi)
+  - **vegetarian**: Pizze vegetariane (Ortolana)
+  - **seafood**: Pizze con pesce (Tonno e Cipolle)
+  - **rustic**: Pizze rustiche (Patate e Salsiccia)
+- Ogni offerta include: id, nome, prezzo scontato, prezzo originale, descrizione, emoji, sconto percentuale, categoria
+- Funzione `getAllOffers()` per ottenere tutte le offerte disponibili
 
 ---
 
@@ -358,11 +371,6 @@ Dichiarazioni TypeScript per i moduli di immagini, permettendo l'import di file 
 
 ---
 
-### `config/` - Configurazioni
-
-Directory per file di configurazione aggiuntivi (attualmente vuota).
-
----
 
 ### `scripts/` - Script Utility
 
@@ -395,10 +403,11 @@ File di configurazione npm che definisce:
 Configurazione Expo che definisce:
 - Nome e slug dell'app
 - Icone e splash screen
-- Permessi (fotocamera, localizzazione)
+- Permessi (fotocamera per scattare foto profilo)
 - Supporto tablet iOS
-- Configurazioni Android (adaptive icon, edge-to-edge)
-- Plugin Expo utilizzati
+- Configurazioni Android (adaptive icon, edge-to-edge, predictive back gesture)
+- Plugin Expo utilizzati (expo-router, expo-splash-screen, expo-camera)
+- Esperimenti attivi (typedRoutes, reactCompiler)
 
 #### `tsconfig.json`
 Configurazione TypeScript che imposta:
@@ -416,8 +425,8 @@ Configurazione Babel che include:
 #### `eslint.config.js`
 Configurazione ESLint per linting del codice con regole Expo.
 
-#### `expo-env.d.ts`
-File TypeScript di riferimento per tipi Expo (non modificabile).
+#### `expo-env.d.ts` (generato automaticamente)
+File TypeScript di riferimento per tipi Expo generato automaticamente (non modificabile, escluso da Git).
 
 ---
 
@@ -489,16 +498,27 @@ L'app utilizza Expo Router con routing basato su file:
 
 ### Gestione Stato
 Lo stato globale è gestito tramite Context API con due context principali:
-- `AuthContext`: Autenticazione e profilo
+- `AuthContext`: Autenticazione e profilo utente/chef
+  - Stato: `user`, `chef`, `isLoading`, `isAuthenticated`, `isChefAuthenticated`
+  - Funzioni: `login`, `register`, `chefLogin`, `logout`, `chefLogout`, `updateUser`
 - `OrderContext`: Carrello e ordini
+  - Stato: `orders`, `completedOrders`, `redeemedOffers`, `lastWheelSpinTimestamp`, `hasOfferInCart`
+  - Funzioni: `addToOrder`, `removeFromOrder`, `updateQuantity`, `clearOrder`, `confirmOrder`, `confirmOrderAsGuest`, `resetWheelCooldown`, `getAllOrders`
 
 ### Persistenza Dati
 I dati vengono salvati in AsyncStorage con chiavi per utente:
-- `orders_{userId}`: Carrello corrente
-- `ordersHistory_{userId}`: Storico ordini
-- `redeemedOffers_{userId}`: Offerte riscattate
-- `lastWheelSpin_{userId}`: Timestamp ultimo spin
-- `globalOrders`: Ordini globali per chef
+- **Per Utente Autenticato**:
+  - `user`: Dati utente (JSON)
+  - `authToken`: Token autenticazione utente
+  - `orders_{userId}`: Carrello corrente
+  - `ordersHistory_{userId}`: Storico ordini completati
+  - `redeemedOffers_{userId}`: Offerte riscattate
+  - `lastWheelSpin_{userId}`: Timestamp ultimo spin ruota
+- **Per Chef**:
+  - `chef`: Dati chef (JSON)
+  - `chefToken`: Token autenticazione chef
+- **Globali**:
+  - `globalOrders`: Ordini globali per chef (tutti gli ordini di tutti gli utenti e ospiti)
 
 ### Credenziali Test
 - **Chef**: email: `chef@gmail.com`, password: `chef`

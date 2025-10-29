@@ -133,7 +133,7 @@ export default function LoginScreen() {
       if (!success) {
         showModal('Errore', 'Credenziali non valide');
       }
-    } catch (error) {
+    } catch {
       showModal('Errore', 'Si è verificato un errore durante il login');
     } finally {
       setIsLoading(false);
@@ -178,7 +178,7 @@ export default function LoginScreen() {
       if (!success) {
         showModal('Errore', 'Si è verificato un errore durante la registrazione');
       }
-    } catch (error) {
+    } catch {
       showModal('Errore', 'Si è verificato un errore durante la registrazione');
     } finally {
       setIsLoading(false);

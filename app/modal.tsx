@@ -1,4 +1,3 @@
-import NuovoIndirizzoModal from '@/app/(modals)/nuovo-indirizzo';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -14,9 +13,6 @@ export default function ModalScreen() {
   let Content = null;
 
   switch (screen) {
-    case 'nuovo-indirizzo':
-      Content = <NuovoIndirizzoModal />;
-      break;
     default:
       Content = (
         <ThemedView style={styles.centered}>
@@ -43,9 +39,7 @@ export default function ModalScreen() {
           />
         </View>
         
-        <ThemedText type="title" style={styles.headerTitle}>
-          {screen === 'nuovo-indirizzo' ? 'Nuovo indirizzo' : 'Modale'}
-        </ThemedText>
+        <ThemedText type="title" style={styles.headerTitle}>Modale</ThemedText>
       </ThemedView>
 
       {/* Contenuto dinamico */}

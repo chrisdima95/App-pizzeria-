@@ -1,11 +1,11 @@
 import { getAllOffers } from "@/data/offers";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, {
-    createContext,
-    ReactNode,
-    useContext,
-    useEffect,
-    useState,
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
 import { useAuth } from "./AuthContext";
 
@@ -323,7 +323,7 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
     registerResetCallback(() => {
       setLastWheelSpinTimestamp(null);
     });
-  }, []); // Array vuoto per eseguire solo una volta
+  }, [registerResetCallback]); // Esegui quando cambia il registratore
 
   // Registra il callback per il logout per pulire completamente i dati
   useEffect(() => {
@@ -334,7 +334,7 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
       setRedeemedOffers([]);
       setLastWheelSpinTimestamp(null);
     });
-  }, []); // Array vuoto per eseguire solo una volta
+  }, [registerLogoutCallback]); // Esegui quando cambia il registratore
 
   return (
     <OrderContext.Provider

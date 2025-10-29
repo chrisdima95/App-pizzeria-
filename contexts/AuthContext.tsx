@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import React, { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 
 interface User {
   id: string;
@@ -43,18 +43,14 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [chef, setChef] = useState<User | null>(null); // Stato separato per Chef
   const [isLoading, setIsLoading] = useState(true);
   const [resetWheelCooldownOnLogin, setResetWheelCooldownOnLogin] = useState<(() => void) | null>(null);
   const [logoutCallback, setLogoutCallback] = useState<(() => void) | null>(null);
 
-  useEffect(() => {
-    checkAuthState();
-  }, []);
-
-  const checkAuthState = async () => {
+  const checkAuthState = useCallback(async () => {
     try {
       const [userData, authToken, chefData, chefToken] = await Promise.all([
         AsyncStorage.getItem('user'),
@@ -98,7 +94,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [resetWheelCooldownOnLogin]);
+
+  useEffect(() => {
+    checkAuthState();
+  }, [checkAuthState]);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -274,4 +274,4 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-};
+}

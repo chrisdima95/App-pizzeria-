@@ -1,5 +1,5 @@
 import { PizzaModal, PizzaModalButton } from "@/components/ui/pizza-modal";
-import React, { useState } from "react";
+import { useState } from "react";
 
 interface UsePizzaModalReturn {
   modalVisible: boolean;
@@ -9,7 +9,7 @@ interface UsePizzaModalReturn {
     buttons?: PizzaModalButton[]
   ) => void;
   hideModal: () => void;
-  ModalComponent: () => React.ReactElement | null;
+  ModalComponent: any;
 }
 
 export const usePizzaModal = (): UsePizzaModalReturn => {

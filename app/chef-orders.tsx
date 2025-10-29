@@ -10,7 +10,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { usePizzaModal } from '@/hooks/use-pizza-modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, Stack } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, TouchableOpacity, useColorScheme as useRNColorScheme, View } from 'react-native';
 
 type FilterType = 'pending' | 'completed';
@@ -39,7 +39,7 @@ export default function ChefOrdersScreen() {
     }
   }, [isChefAuthenticated, chef, isLoggingOut]);
 
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
     try {
       const orders = await getAllOrders();
       setAllOrders(orders);
@@ -49,7 +49,7 @@ export default function ChefOrdersScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [getAllOrders]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -61,7 +61,7 @@ export default function ChefOrdersScreen() {
     if (chef) {
       loadOrders();
     }
-  }, [chef]);
+  }, [chef, loadOrders]);
 
   const handleLogout = () => {
     showModal('Logout', 'Sei sicuro di voler uscire?', [

@@ -1,6 +1,3 @@
-// Import immagine con require per compatibilità Android
-// (gli import default di asset possono dare problemi con Metro su alcune piattaforme)
-const RuotaImage = require("@/assets/images/ruota.png");
 import { ThemedText } from "@/components/themed-text";
 import { Colors } from "@/constants/theme";
 import { usePizzaModal } from "@/hooks/use-pizza-modal";
@@ -16,6 +13,10 @@ import {
   View,
 } from "react-native";
 import { type Offer } from "./offer-carousel";
+
+// Import immagine con require per compatibilità Android
+// (gli import default di asset possono dare problemi con Metro su alcune piattaforme)
+const RuotaImage = require("@/assets/images/ruota.png");
 
 const { width: screenWidth } = Dimensions.get("window");
 const WHEEL_SIZE = Math.min(screenWidth * 1.0, 600);

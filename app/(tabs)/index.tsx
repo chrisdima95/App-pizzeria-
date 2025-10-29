@@ -7,15 +7,15 @@ import { useOrder } from "@/contexts/OrderContext";
 import pizzasData from "@/data/pizzas.json";
 import { useTransitionAnimations } from "@/hooks/use-transition-animations";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-    FlatList,
-    Image,
-    Platform,
-    StyleSheet,
-    TouchableOpacity,
-    useColorScheme,
-    View,
+  FlatList,
+  Image,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+  View,
 } from "react-native";
 import Animated from "react-native-reanimated";
 
@@ -45,7 +45,6 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
   const cardBg = colors.card;
-  const mutedText = colors.muted;
   const accentBg = colorScheme === "dark" ? colors.border : colors.background;
 
   const { orders, addToOrder, updateQuantity, removeFromOrder } = useOrder();
@@ -59,10 +58,6 @@ export default function HomeScreen() {
   // Hook per le animazioni di transizione (senza mascotte)
   const {
     startAnimations,
-    getCardAnimatedStyle,
-    chefRecommendationAnimatedStyle,
-    cartButtonAnimatedStyle,
-    categoriesAnimatedStyle,
     backgroundAnimatedStyle,
   } = useTransitionAnimations();
 
@@ -74,7 +69,7 @@ export default function HomeScreen() {
     }, 100);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [startAnimations]);
 
   // Pizza consigliata dinamica - cambia casualmente ad ogni avvio dell'app
   const getChefRecommendation = () => {
@@ -156,7 +151,7 @@ export default function HomeScreen() {
   const renderPizzaItem = ({ item, index }: { item: Pizza; index: number }) => {
     const quantity = getPizzaQuantity(item.id);
     // Limita l'indice a 4 (0-4) per evitare errori con le animazioni
-    const cardAnimatedStyle = getCardAnimatedStyle(Math.min(index, 4));
+    // Animazioni per-card non utilizzate al momento
 
     return (
       <Animated.View

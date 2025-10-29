@@ -1,6 +1,6 @@
 import { ThemedText } from "@/components/themed-text";
 import { Colors } from "@/constants/theme";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Image,
   Modal,
@@ -16,11 +16,11 @@ interface CooldownModalProps {
   timeRemaining: number;
 }
 
-export const CooldownModal: React.FC<CooldownModalProps> = ({
+export function CooldownModal({
   visible,
   onClose,
   timeRemaining,
-}) => {
+}: CooldownModalProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
   const [displayTime, setDisplayTime] = useState(timeRemaining);
@@ -98,7 +98,7 @@ export const CooldownModal: React.FC<CooldownModalProps> = ({
       </View>
     </Modal>
   );
-};
+}
 
 const styles = StyleSheet.create({
   overlay: {

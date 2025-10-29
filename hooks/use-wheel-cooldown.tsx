@@ -1,14 +1,12 @@
 import { CooldownModal } from "@/components/ui/cooldown-modal";
 import { useOrder } from "@/contexts/OrderContext";
-import { usePizzaModal } from "@/hooks/use-pizza-modal";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const COOLDOWN_HOURS = 24;
 const COOLDOWN_MS = COOLDOWN_HOURS * 60 * 60 * 1000; // 24 ore in millisecondi
 
 export const useWheelCooldown = () => {
   const { lastWheelSpinTimestamp, redeemedOffers, hasOfferInCart } = useOrder();
-  const { showModal, ModalComponent } = usePizzaModal();
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [isOnCooldown, setIsOnCooldown] = useState<boolean>(false);
   const [showCooldownModal, setShowCooldownModal] = useState<boolean>(false);

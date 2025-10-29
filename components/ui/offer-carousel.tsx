@@ -1,6 +1,6 @@
 import { ThemedText } from '@/components/themed-text';
 import { Colors } from '@/constants/theme';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -17,19 +17,6 @@ const CARD_WIDTH = screenWidth * 0.75;
 const CARD_SPACING = 20;
 const PEEK_WIDTH = 20;
 
-// Funzione per ottenere elementi distintivi per categoria
-const getCategoryElements = (category: string) => {
-  const elements = {
-    kids: { icon: '●', pattern: 'dots', accent: 'top' },
-    teens: { icon: '▲', pattern: 'lines', accent: 'right' },
-    adults: { icon: '■', pattern: 'grid', accent: 'bottom' },
-    seniors: { icon: '◆', pattern: 'diamonds', accent: 'left' },
-    family: { icon: '★', pattern: 'stars', accent: 'center' },
-    gourmet: { icon: '♦', pattern: 'luxury', accent: 'all' },
-  };
-  return elements[category as keyof typeof elements] || elements.adults;
-};
-
 export interface Offer {
   id: string;
   name: string;
@@ -39,8 +26,6 @@ export interface Offer {
   emoji: string;
   discount?: number;
   category: string;
-  ageGroup?: string;
-  target?: string;
 }
 
 interface OfferCarouselProps {
@@ -111,7 +96,6 @@ export function OfferCarousel({
   const renderOffer = ({ item, index }: { item: Offer; index: number }) => {
     const isRedeemed = redeemedOffers.includes(item.id);
     const hasDiscount = item.originalPrice && item.originalPrice > item.price;
-    const categoryElements = getCategoryElements(item.category);
     const cardAnimations = getCardStyle(index);
 
     return (
@@ -135,16 +119,8 @@ export function OfferCarousel({
             variant="elevated"
             style={styles.card}
           >
-            {/* Pattern di sfondo sottile */}
-            <View style={[styles.patternOverlay, getPatternStyle(categoryElements.pattern, colors)]} />
-            
-            {/* Header con elementi distintivi */}
+            {/* Header con badge sconto */}
             <View style={styles.cardHeader}>
-              <View style={styles.categoryIndicator}>
-                <ThemedText style={[styles.categoryIcon, { color: colors.primary }]}>
-                  {categoryElements.icon}
-                </ThemedText>
-              </View>
               {hasDiscount && (
                 <Animated.View 
                   style={[
@@ -231,19 +207,6 @@ export function OfferCarousel({
         </TouchableOpacity>
       </Animated.View>
     );
-  };
-
-
-  const getPatternStyle = (pattern: string, colors: any) => {
-    const patterns = {
-      dots: { backgroundColor: colors.primary + '05' },
-      lines: { backgroundColor: colors.primary + '03' },
-      grid: { backgroundColor: colors.primary + '07' },
-      diamonds: { backgroundColor: colors.primary + '04' },
-      stars: { backgroundColor: colors.primary + '06' },
-      luxury: { backgroundColor: colors.primary + '08' },
-    };
-    return patterns[pattern as keyof typeof patterns] || patterns.dots;
   };
 
   const getButtonShadowStyle = (isActive: boolean, colors: any) => {
@@ -415,33 +378,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     position: 'relative',
   },
-  patternOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    opacity: 0.3,
-    borderRadius: 20,
-  },
   cardHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     marginBottom: 12,
     zIndex: 1,
-  },
-  categoryIndicator: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(112, 53, 55, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  categoryIcon: {
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   discountBadge: {
     paddingHorizontal: 10,
