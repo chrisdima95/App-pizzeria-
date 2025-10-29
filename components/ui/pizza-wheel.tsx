@@ -1,9 +1,11 @@
-import RuotaImage from "@/assets/images/Ruota.png";
+// Import immagine con require per compatibilità Android
+// (gli import default di asset possono dare problemi con Metro su alcune piattaforme)
+const RuotaImage = require("@/assets/images/Ruota.png");
 import { ThemedText } from "@/components/themed-text";
 import { Colors } from "@/constants/theme";
 import { usePizzaModal } from "@/hooks/use-pizza-modal";
 import { useWheelCooldown } from "@/hooks/use-wheel-cooldown";
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
