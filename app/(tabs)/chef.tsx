@@ -1,27 +1,41 @@
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Colors } from '@/constants/theme';
-import { useAuth } from '@/contexts/AuthContext';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { usePizzaModal } from '@/hooks/use-pizza-modal';
-import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { Colors } from "@/constants/theme";
+import { useAuth } from "@/contexts/AuthContext";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { usePizzaModal } from "@/hooks/use-pizza-modal";
+import { router } from "expo-router";
+import * as Clipboard from "expo-clipboard";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 
 export default function ChefScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { chefLogin, isChefAuthenticated, isLoading: authLoading, chef, isAuthenticated, user } = useAuth();
+  const {
+    chefLogin,
+    isChefAuthenticated,
+    isLoading: authLoading,
+    chef,
+    isAuthenticated,
+    user,
+  } = useAuth();
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+  const colors = Colors[colorScheme ?? "light"];
   const { showModal, ModalComponent } = usePizzaModal();
 
   // Redirect solo se già autenticato come chef
   useEffect(() => {
     if (!authLoading && isChefAuthenticated && chef) {
       // Solo se il chef è già autenticato, vai alla pagina degli ordini chef
-      router.replace('/chef-orders');
+      router.replace("/chef-orders");
     }
   }, [isChefAuthenticated, authLoading, chef]);
 
@@ -44,68 +58,82 @@ export default function ChefScreen() {
 
   const handleChefLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      showModal('Errore', 'Inserisci email e password');
+      showModal("Errore", "Inserisci email e password");
       return;
     }
-    
+
     // Controlla se l'utente è già loggato come cliente
     if (isAuthenticated && user && !user.isChef) {
       showModal(
-        'Sessione Attiva',
+        "Sessione Attiva",
         'Sei attualmente loggato come cliente. Devi effettuare il logout dalla pagina "Profilo" per poter accedere come Chef.',
         [
-          { text: 'Annulla', style: 'cancel' },
-          { 
-            text: 'Vai al Profilo', 
+          { text: "Annulla", style: "cancel" },
+          {
+            text: "Vai al Profilo",
             onPress: () => {
               // Pulisce i campi password per evitare l'alert "Vuoi salvare password"
-              setEmail('');
-              setPassword('');
+              setEmail("");
+              setPassword("");
               // Piccolo delay per assicurarsi che i campi siano puliti prima del redirect
               setTimeout(() => {
-                router.replace('/(tabs)/profilo');
+                router.replace("/(tabs)/profilo");
               }, 100);
-            }
-          }
+            },
+          },
         ]
       );
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     try {
       const success = await chefLogin(email, password);
       if (!success) {
-        showModal('Errore', 'Credenziali Chef non valide');
+        showModal("Errore", "Credenziali Chef non valide");
       }
       // Il redirect viene gestito automaticamente dal chefLogin
     } catch (error) {
-      showModal('Errore', 'Si è verificato un errore durante il login Chef');
+      showModal("Errore", "Si è verificato un errore durante il login Chef");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+    <ThemedView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
         <ThemedView style={styles.header}>
-          <ThemedText type="title" style={[styles.title, { color: colors.text }]}>
+          <ThemedText
+            type="title"
+            style={[styles.title, { color: colors.text }]}
+          >
             Area Chef
           </ThemedText>
-          <ThemedText type="subtitle" style={[styles.subtitle, { color: colors.muted }]}>
+          <ThemedText
+            type="subtitle"
+            style={[styles.subtitle, { color: colors.muted }]}
+          >
             Accedi per gestire gli ordini
           </ThemedText>
         </ThemedView>
 
         <ThemedView style={styles.form}>
           <TextInput
-            style={[styles.input, { 
-              backgroundColor: colors.card, 
-              borderColor: colors.border,
-              color: colors.text 
-            }]}
+            style={[
+              styles.input,
+              {
+                backgroundColor: colors.card,
+                borderColor: colors.border,
+                color: colors.text,
+              },
+            ]}
             placeholder="Email Chef"
             placeholderTextColor={colors.muted}
             value={email}
@@ -114,13 +142,16 @@ export default function ChefScreen() {
             autoCapitalize="none"
             autoCorrect={false}
           />
-          
+
           <TextInput
-            style={[styles.input, { 
-              backgroundColor: colors.card, 
-              borderColor: colors.border,
-              color: colors.text 
-            }]}
+            style={[
+              styles.input,
+              {
+                backgroundColor: colors.card,
+                borderColor: colors.border,
+                color: colors.text,
+              },
+            ]}
             placeholder="Password Chef"
             placeholderTextColor={colors.muted}
             value={password}
@@ -130,35 +161,70 @@ export default function ChefScreen() {
             textContentType="none"
           />
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[
-              styles.actionButton, 
+              styles.actionButton,
               { backgroundColor: colors.primary },
               isLoading && styles.actionButtonDisabled,
-              { pointerEvents: isLoading ? 'none' : 'auto' }
-            ]} 
+              { pointerEvents: isLoading ? "none" : "auto" },
+            ]}
             onPress={handleChefLogin}
             disabled={isLoading}
           >
             {isLoading ? (
               <ActivityIndicator color="white" />
             ) : (
-              <ThemedText style={styles.actionButtonText}>
+              <ThemedText
+                style={styles.actionButtonText}
+                numberOfLines={1}
+                adjustsFontSizeToFit={true}
+                minimumFontScale={0.8}
+              >
                 Accedi come Chef
               </ThemedText>
             )}
           </TouchableOpacity>
 
           <ThemedView style={styles.credentialsInfo}>
-            <ThemedText style={[styles.credentialsText, { color: colors.muted }]}>
+            <ThemedText
+              style={[styles.credentialsText, { color: colors.muted }]}
+            >
               Credenziali di test:
             </ThemedText>
-            <ThemedText style={[styles.credentialsText, { color: colors.muted }]}>
-              Email: chef@gmail.com
-            </ThemedText>
-            <ThemedText style={[styles.credentialsText, { color: colors.muted }]}>
-              Password: chef
-            </ThemedText>
+            <TouchableOpacity
+              onPress={async () => {
+                await Clipboard.setStringAsync("chef@gmail.com");
+                showModal("Copiato!", "Email copiata negli appunti");
+              }}
+              activeOpacity={0.7}
+            >
+              <ThemedText
+                style={[
+                  styles.credentialsText,
+                  styles.clickableCredential,
+                  { color: colors.primary },
+                ]}
+              >
+                Email: chef@gmail.com
+              </ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={async () => {
+                await Clipboard.setStringAsync("chef");
+                showModal("Copiato!", "Password copiata negli appunti");
+              }}
+              activeOpacity={0.7}
+            >
+              <ThemedText
+                style={[
+                  styles.credentialsText,
+                  styles.clickableCredential,
+                  { color: colors.primary },
+                ]}
+              >
+                Password: chef
+              </ThemedText>
+            </TouchableOpacity>
           </ThemedView>
         </ThemedView>
       </ScrollView>
@@ -173,29 +239,29 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 20,
-    minHeight: '100%',
+    minHeight: "100%",
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 40,
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
-    textAlign: 'center',
+    textAlign: "center",
   },
   subtitle: {
     fontSize: 16,
     opacity: 0.8,
-    textAlign: 'center',
+    textAlign: "center",
   },
   form: {
-    width: '100%',
+    width: "100%",
     maxWidth: 400,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   input: {
     borderRadius: 12,
@@ -203,7 +269,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     fontSize: 16,
     borderWidth: 1,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 1,
@@ -214,11 +280,14 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 8,
     marginBottom: 16,
-    shadowColor: '#E53E3E',
+    width: "100%",
+    shadowColor: "#E53E3E",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -228,9 +297,11 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   actionButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+    width: "100%",
   },
   actionButtonDisabled: {
     opacity: 0.6,
@@ -239,17 +310,21 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 16,
     borderRadius: 8,
-    backgroundColor: 'rgba(0,0,0,0.05)',
+    backgroundColor: "rgba(0,0,0,0.05)",
   },
   credentialsText: {
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 4,
+  },
+  clickableCredential: {
+    textDecorationLine: "underline",
+    marginTop: 8,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     gap: 16,
   },
   loadingText: {
@@ -259,13 +334,13 @@ const styles = StyleSheet.create({
     marginTop: 16,
     padding: 12,
     borderRadius: 8,
-    backgroundColor: 'rgba(255, 0, 0, 0.1)',
+    backgroundColor: "rgba(255, 0, 0, 0.1)",
     borderWidth: 1,
-    borderColor: 'rgba(255, 0, 0, 0.3)',
+    borderColor: "rgba(255, 0, 0, 0.3)",
   },
   warningText: {
     fontSize: 14,
-    textAlign: 'center',
-    fontWeight: '500',
+    textAlign: "center",
+    fontWeight: "500",
   },
 });
