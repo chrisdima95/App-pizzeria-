@@ -389,5 +389,29 @@
       "protein": "20g",
       "fat": "16g"
     }
+  },
+  {
+    "id": "18",
+    "name": "Pizza Mare e Monti",
+    "price": "17.50",
+    "description": "Mozzarella, gamberi, speck, funghi porcini",
+    "image": "https://us.123rf.com/450wm/memetiqaosvor/memetiqaosvor2505/memetiqaosvor250504105/247791251-beautiful-landscape-with-mountains-and-ocean-vector-illustration-in-a-flat-style.jpg?ver=6",
+    "ingredients": [
+      "Mozzarella",
+      "Gamberi freschi",
+      "Speck dell'Alto Adige",
+      "Funghi porcini",
+      "Pomodorini",
+      "Rucola fresca",
+      "Olio EVO"
+    ],
+    "fullDescription": "Una combinazione unica di sapori! Gamberi freschi e funghi porcini con speck su base di mozzarella. Dove il mare incontra la montagna in un'esplosione di sapori.",
+    "category": "speciali",
+    "nutrition": {
+      "calories": "300 kcal",
+      "carbs": "25g",
+      "protein": "23g",
+      "fat": "14g"
+    }
   }
 ]
