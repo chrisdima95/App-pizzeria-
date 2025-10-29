@@ -32,6 +32,7 @@ interface OrderContextType {
   removeFromOrder: (id: string) => void; // rimuove completamente un ordine
   clearOrder: () => void;
   confirmOrder: () => Promise<void>;
+  confirmOrderAsGuest: () => Promise<void>; // conferma ordine come ospite (non loggato)
   resetWheelCooldown: () => void; // resetta il countdown della ruota
   getAllOrders: () => Promise<OrderItem[][]>; // ottiene tutti gli ordini di tutti gli utenti
 }
@@ -277,6 +278,31 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
     setOrders([]);
   };
 
+  // Funzione per confermare ordini come ospite (non loggato)
+  const confirmOrderAsGuest = async () => {
+    if (!orders.length) return;
+
+    // Crea una copia degli ordini con userEmail "Ospite"
+    const ordersAsGuest = orders.map((o) => ({ 
+      ...o, 
+      userEmail: "Ospite" 
+    }));
+
+    // Salva negli ordini globali per il chef
+    try {
+      const globalOrdersKey = 'globalOrders';
+      const existingGlobalOrders = await AsyncStorage.getItem(globalOrdersKey);
+      const globalOrders: OrderItem[][] = existingGlobalOrders ? JSON.parse(existingGlobalOrders) : [];
+      globalOrders.push(ordersAsGuest);
+      await AsyncStorage.setItem(globalOrdersKey, JSON.stringify(globalOrders));
+    } catch (error) {
+      console.error('Errore nel salvataggio ordini ospiti:', error);
+    }
+    
+    // svuota il carrello
+    setOrders([]);
+  };
+
   const resetWheelCooldown = () => {
     setLastWheelSpinTimestamp(null);
   };
@@ -324,6 +350,7 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
         removeFromOrder,
         clearOrder,
         confirmOrder,
+        confirmOrderAsGuest,
         resetWheelCooldown,
         getAllOrders,
       }}

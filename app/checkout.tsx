@@ -1,18 +1,18 @@
 import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Colors } from "@/constants/theme";
+import { useAuth } from "@/contexts/AuthContext";
 import { useOrder } from "@/contexts/OrderContext";
 import { usePizzaModal } from "@/hooks/use-pizza-modal";
 import { useRouter } from "expo-router";
-import React from "react";
 import {
-    FlatList,
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    useColorScheme,
-    View,
+  FlatList,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View,
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 
@@ -39,11 +39,12 @@ const pizzas = [
 
 export default function CheckoutScreen() {
   const router = useRouter();
-  const { orders, confirmOrder, updateQuantity, removeFromOrder, clearOrder } =
+  const { orders, confirmOrder, confirmOrderAsGuest, updateQuantity, removeFromOrder, clearOrder } =
     useOrder();
+  const { isAuthenticated } = useAuth();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
-  const { showModal, ModalComponent } = usePizzaModal();
+  const { showModal, hideModal, ModalComponent } = usePizzaModal();
 
   // Calcola il totale dell'ordine
   const totalPrice = orders.reduce(
@@ -63,27 +64,67 @@ export default function CheckoutScreen() {
       return;
     }
 
-    const goToOrders = async () => {
-      await confirmOrder();
-      router.dismiss();
-      router.push("/ordini");
-    };
+    // Se l'utente è loggato, comportamento normale: salva l'ordine e va agli ordini
+    if (isAuthenticated) {
+      const goToOrders = async () => {
+        await confirmOrder();
+        router.dismiss();
+        router.push("/ordini");
+      };
 
-    if (Platform.OS === "web") {
-      goToOrders();
-      return;
+      if (Platform.OS === "web") {
+        goToOrders();
+        return;
+      }
+
+      showModal(
+        "Ordine confermato",
+        "Il tuo ordine è stato confermato con successo!",
+        [
+          {
+            text: "OK",
+            onPress: goToOrders,
+          },
+        ]
+      );
+    } else {
+      // Se l'utente NON è loggato, salva l'ordine come ospite e torna al Menù
+      const resetCartAndGoToMenu = async () => {
+        // Chiudi prima il modale "Ordine confermato" per una transizione più fluida
+        hideModal();
+        // Salva l'ordine come ospite negli ordini globali per il chef
+        await confirmOrderAsGuest();
+        
+        // Usa requestAnimationFrame per sincronizzare con il ciclo di rendering
+        requestAnimationFrame(() => {
+          // Chiudi il modal del checkout
+          router.dismiss();
+          // Aspetta che l'animazione di chiusura del modal si completi prima di navigare
+          setTimeout(() => {
+            router.replace("/(tabs)");
+          }, 300); // Delay ottimizzato per l'animazione del modal (slide down)
+        });
+      };
+
+      if (Platform.OS === "web") {
+        confirmOrderAsGuest().then(() => {
+          router.dismiss();
+          router.replace("/(tabs)");
+        });
+        return;
+      }
+
+      showModal(
+        "Ordine confermato",
+        "Il tuo ordine è stato confermato con successo!",
+        [
+          {
+            text: "OK",
+            onPress: resetCartAndGoToMenu,
+          },
+        ]
+      );
     }
-
-    showModal(
-      "Ordine confermato",
-      "Il tuo ordine è stato confermato con successo!",
-      [
-        {
-          text: "OK",
-          onPress: goToOrders,
-        },
-      ]
-    );
   };
 
   const handleClearCart = () => {
