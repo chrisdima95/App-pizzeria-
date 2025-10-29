@@ -6,13 +6,12 @@ import { Colors } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrder } from "@/contexts/OrderContext";
 import { useRouter } from "expo-router";
-import React from "react";
 import {
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  useColorScheme,
-  View,
+    FlatList,
+    StyleSheet,
+    TouchableOpacity,
+    useColorScheme,
+    View,
 } from "react-native";
 
 interface OrderGroup {
@@ -143,11 +142,11 @@ export default function OrdiniScreen() {
     >
       <TabHeader title="I tuoi ordini" showMascotte={false} />
 
-      {/* Pulsante Nuovo Ordine */}
-      <View style={styles.newOrderContainer}>
+      {/* Pulsante Torna al Menù */}
+      <View style={styles.backMenuContainer}>
         <TouchableOpacity
           style={[
-            styles.newOrderButton,
+            styles.backMenuButton,
             {
               backgroundColor: colors.primary,
               borderColor: colors.primary,
@@ -155,11 +154,11 @@ export default function OrdiniScreen() {
           ]}
           onPress={() => router.push("/(tabs)")}
         >
-          <IconSymbol size={18} name="plus" color="white" />
+          <IconSymbol size={18} name="chevron.left" color="white" />
           <ThemedText
-            style={[styles.newOrderText, { color: "white" }]}
+            style={[styles.backMenuText, { color: "white" }]}
           >
-            Nuovo ordine
+            Torna al menù
           </ThemedText>
         </TouchableOpacity>
       </View>
@@ -200,12 +199,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 20,
   },
-  newOrderContainer: {
+  backMenuContainer: {
     paddingHorizontal: 20,
     paddingBottom: 16,
-    alignItems: "flex-end",
+    alignItems: "flex-start",
   },
-  newOrderButton: {
+  backMenuButton: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
@@ -218,7 +217,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
-  newOrderText: {
+  backMenuText: {
     fontSize: 14,
     fontWeight: "600",
   },
