@@ -1,3 +1,4 @@
+import RuotaImage from "@/assets/images/Ruota.png";
 import { ThemedText } from "@/components/themed-text";
 import { Colors } from "@/constants/theme";
 import { usePizzaModal } from "@/hooks/use-pizza-modal";
@@ -326,7 +327,7 @@ export function PizzaWheel({
           >
             <Animated.View style={styles.gestureContainer}>
               <Image
-                source={require("@/assets/images/Ruota.png")}
+                source={RuotaImage}
                 style={styles.wheelImage}
                 resizeMode="contain"
               />
