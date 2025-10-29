@@ -4,7 +4,6 @@ import { Colors } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { usePizzaModal } from "@/hooks/use-pizza-modal";
-import * as Clipboard from "expo-clipboard";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -191,40 +190,24 @@ export default function ChefScreen() {
             >
               Credenziali di test:
             </ThemedText>
-            <TouchableOpacity
-              onPress={async () => {
-                await Clipboard.setStringAsync("chef@gmail.com");
-                showModal("Copiato!", "Email copiata negli appunti");
-              }}
-              activeOpacity={0.7}
+            <ThemedText
+              style={[
+                styles.credentialsText,
+                styles.clickableCredential,
+                { color: colors.primary },
+              ]}
             >
-              <ThemedText
-                style={[
-                  styles.credentialsText,
-                  styles.clickableCredential,
-                  { color: colors.primary },
-                ]}
-              >
-                Email: chef@gmail.com
-              </ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={async () => {
-                await Clipboard.setStringAsync("chef");
-                showModal("Copiato!", "Password copiata negli appunti");
-              }}
-              activeOpacity={0.7}
+              Email: chef@gmail.com
+            </ThemedText>
+            <ThemedText
+              style={[
+                styles.credentialsText,
+                styles.clickableCredential,
+                { color: colors.primary },
+              ]}
             >
-              <ThemedText
-                style={[
-                  styles.credentialsText,
-                  styles.clickableCredential,
-                  { color: colors.primary },
-                ]}
-              >
-                Password: chef
-              </ThemedText>
-            </TouchableOpacity>
+              Password: chef
+            </ThemedText>
           </ThemedView>
         </ThemedView>
       </ScrollView>

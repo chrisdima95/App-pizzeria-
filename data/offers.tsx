@@ -1,4 +1,4 @@
-import { Offer } from '../components/ui/offer-carousel';
+import { Offer } from '../types/offer';
 
 // Offerte generiche disponibili nella ruota della fortuna
 export const wheelOffers: Offer[] = [

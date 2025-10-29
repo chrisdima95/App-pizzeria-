@@ -49,8 +49,6 @@ App-pizzeria-/
 │   ├── 📄 pizza-details.tsx         # Dettagli pizza
 │   ├── 📄 ordini.tsx                # Storico ordini utente
 │   ├── 📄 chef-orders.tsx           # Gestione ordini chef
-│   ├── 📄 modal.tsx                 # Modal generico
-│   ├── 📄 modifica-profilo.tsx      # Modifica profilo utente
 │   │
 │   ├── 📂 (tabs)/                   # Route group per tab navigator
 │       ├── 📄 _layout.tsx           # Layout tab navigator
@@ -61,7 +59,6 @@ App-pizzeria-/
 │   
 │
 ├── 📂 components/                   # Componenti React riutilizzabili
-│   ├── 📄 AuthGuard.tsx             # Guard per route protette
 │   ├── 📄 ChefRecommendation.tsx    # Componente raccomandazione chef
 │   ├── 📄 haptic-tab.tsx            # Wrapper tab con feedback haptic
 │   ├── 📄 TabHeader.tsx             # Header personalizzato per tab
@@ -75,7 +72,7 @@ App-pizzeria-/
 │       ├── 📄 icon-symbol.tsx       # Icona simbolo generica
 │       ├── 📄 icon-symbol.ios.tsx   # Icona simbolo iOS (SF Symbols)
 │       ├── 📄 mascotte-icon.tsx     # Icona mascotte
-│       ├── 📄 offer-carousel.tsx    # Carosello offerte (deprecato)
+│       ├── (rimosso) offer-carousel.tsx    # Carosello offerte (sostituito dalla ruota)
 │       ├── 📄 pizza-badge.tsx       # Badge personalizzato
 │       ├── 📄 pizza-button.tsx      # Pulsante tematico
 │       ├── 📄 pizza-card.tsx        # Card pizza
@@ -121,9 +118,6 @@ App-pizzeria-/
 │
 ├── 📂 types/                        # Definizioni TypeScript
 │   └── 📄 images.d.ts               # Dichiarazioni moduli immagini
-│
-├── 📂 scripts/                      # Script Node.js utility
-│   └── 📄 reset-project.js          # Script reset progetto
 │
 ├── 📂 .vscode/                      # Configurazione Visual Studio Code
 │   ├── 📄 settings.json             # Impostazioni editor
@@ -210,13 +204,6 @@ Directory principale dell'applicazione che utilizza **Expo Router** con routing 
 - Filtri per stato
 - Aggiornamento stati in tempo reale
 
-**`modal.tsx`**
-- Modal generico riutilizzabile
-
-**`modifica-profilo.tsx`**
-- Modifica dati profilo utente
-- Aggiornamento informazioni personali
-
 #### 📁 `app/(tabs)/` - Tab Navigator
 
 Route group per navigazione a tab. Le tab sono visibili in fondo allo schermo.
@@ -263,11 +250,6 @@ Route group per navigazione a tab. Le tab sono visibili in fondo allo schermo.
 ### 📁 `components/` - Componenti Riutilizzabili
 
 Contiene tutti i componenti React riutilizzabili dell'applicazione.
-
-**`AuthGuard.tsx`**
-- Componente guard per route protette
-- Reindirizza utenti non autenticati al login
-- Verifica stato autenticazione
 
 **`ChefRecommendation.tsx`**
 - Pizza consigliata dallo chef
@@ -324,9 +306,7 @@ Componenti UI specifici per l'app pizzeria con stile tematico.
 - Utilizzata in header e navigazione
 
 **`offer-carousel.tsx`**
-- Carosello offerte (deprecato)
-- Sostituito da ruota della fortuna
-- Mantenuto per retrocompatibilità
+- Rimosso. In precedenza mostrava un carosello offerte; ora le offerte sono gestite esclusivamente dalla ruota (`components/ui/pizza-wheel.tsx`).
 
 **`pizza-badge.tsx`**
 - Badge personalizzato
@@ -434,13 +414,10 @@ Hooks personalizzati React per funzionalità riutilizzabili.
 - Accesso palette colori
 
 **`use-transition-animations.tsx`**
-- Hook complesso animazioni transizione
-- Animazioni card pizze
-- Animazioni raccomandazioni chef
-- Animazioni pulsanti carrello
-- Animazioni categorie
-- Animazioni background
-- Transizioni fluide tra schermate
+- Hook snellito per animazioni di transizione
+- Espone `startAnimations()` per avviare animazioni globali
+- Espone `backgroundAnimatedStyle` per animazione background
+- Animazioni legacy per card/chef/cart/categorie rimosse (non più utilizzate)
 
 **`use-wheel-cooldown.tsx`**
 - Gestione cooldown ruota fortuna
@@ -565,18 +542,6 @@ Definizioni tipo TypeScript personalizzate.
 
 ---
 
-### 📁 `scripts/` - Script Utility
-
-Script Node.js per automatizzare operazioni.
-
-**`reset-project.js`**
-- Script reset progetto stato iniziale
-- Sposta file esistenti in `app-example`
-- Crea nuova struttura base
-- Opzione move/delete file esistenti
-- Genera file base `app/index.tsx` e `app/_layout.tsx`
-- Utility per ripartire da zero
-
 ---
 
 ### 📁 `.vscode/` - Configurazione Visual Studio Code
@@ -617,7 +582,6 @@ File configurazione npm che definisce:
 - `npm run android`: Avvia su Android
 - `npm run ios`: Avvia su iOS
 - `npm run lint`: Esegue linting codice
-- `npm run reset-project`: Reset progetto a stato iniziale
 
 **Dipendenze Principali**:
 - React Native 0.81.5
@@ -849,8 +813,6 @@ app/
 ├── pizza-details.tsx     → Route: /pizza-details
 ├── ordini.tsx            → Route: /ordini
 ├── chef-orders.tsx       → Route: /chef-orders
-├── modal.tsx             → Route: /modal
-├── modifica-profilo.tsx  → Route: /modifica-profilo
 ├── (tabs)/
 │   ├── _layout.tsx       → Layout Tab Navigator
 │   ├── index.tsx         → Route: /(tabs) o /
@@ -1100,8 +1062,6 @@ npm run ios
 # Esegui linting
 npm run lint
 
-# Reset progetto (attenzione: distruttivo)
-npm run reset-project
 ```
 
 ---

@@ -82,12 +82,6 @@ Schermata gestione ordini per il chef che permette:
 - Filtri per stato
 - Aggiornamento stati in tempo reale
 
-#### `app/modal.tsx`
-Modal generico utilizzato in varie parti dell'app.
-
-#### `app/modifica-profilo.tsx`
-Schermata per modificare i dati del profilo utente.
-
 #### `app/(tabs)/` - Tab Navigator (Navigazione a Tab)
 
 Directory che contiene le schermate principali accessibili tramite tab bar in basso.
@@ -142,9 +136,6 @@ Directory per modals dell'applicazione (attualmente senza modali specifici).
 
 Contiene tutti i componenti React riutilizzabili nell'applicazione.
 
-#### `components/AuthGuard.tsx`
-Componente guard che protegge le route che richiedono autenticazione, reindirizzando gli utenti non autenticati al login.
-
 #### `components/ChefRecommendation.tsx`
 Componente che mostra la pizza consigliata dallo chef, utilizzato nella schermata menu principale.
 
@@ -184,8 +175,7 @@ Componenti per icone simboliche:
 ##### `components/ui/mascotte-icon.tsx`
 Icona personalizzata della mascotte dell'applicazione.
 
-##### `components/ui/offer-carousel.tsx`
-Componente carosello per mostrare le offerte disponibili (non più utilizzato, sostituito dalla ruota).
+<!-- Rimosso: `components/ui/offer-carousel.tsx` era un vecchio carosello offerte, sostituito dalla ruota della fortuna. -->
 
 ##### `components/ui/pizza-badge.tsx`
 Badge personalizzato per contrassegnare elementi (es. "Nuovo", "In Offerta").
@@ -309,12 +299,10 @@ Hook per gestire i modal personalizzati dell'app, fornendo funzioni per mostrare
 Hook per ottenere i colori del tema corrente in base allo schema selezionato.
 
 #### `hooks/use-transition-animations.tsx`
-Hook complesso per gestire animazioni di transizione tra schermate, incluso:
-- Animazioni per card delle pizze
-- Animazioni per raccomandazioni chef
-- Animazioni per pulsanti carrello
-- Animazioni per categorie
-- Animazioni di background
+Hook per animazioni di transizione tra schermate. Al momento espone solo:
+- `startAnimations`
+- `backgroundAnimatedStyle`
+Le altre animazioni legacy (card, raccomandazioni chef, pulsante carrello, categorie) sono state rimosse perché non più utilizzate.
 
 #### `hooks/use-wheel-cooldown.tsx`
 Hook per gestire il cooldown della ruota della fortuna, calcolando il tempo rimanente prima di poter rigirare.
@@ -376,9 +364,6 @@ Dichiarazioni TypeScript per i moduli di immagini, permettendo l'import di file 
 
 Contiene script Node.js per automatizzare operazioni.
 
-#### `scripts/reset-project.js`
-Script per resettare il progetto a uno stato iniziale, spostando file esistenti in `app-example` e creando una nuova struttura base.
-
 ---
 
 ## 📄 Dettagli dei File Principali
@@ -388,7 +373,7 @@ Script per resettare il progetto a uno stato iniziale, spostando file esistenti 
 #### `package.json`
 File di configurazione npm che definisce:
 - Nome progetto: "navigation"
-- Script: start, android, ios, lint, reset-project
+- Script: start, android, ios, lint
 - Dipendenze principali:
   - React Native 0.81.5 e React 19.1.0
   - Expo SDK 54.0.21

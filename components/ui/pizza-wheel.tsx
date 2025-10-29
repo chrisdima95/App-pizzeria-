@@ -12,7 +12,7 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import { type Offer } from "./offer-carousel";
+import { type Offer } from "@/types/offer";
 
 // Import immagine con require per compatibilità Android
 // (gli import default di asset possono dare problemi con Metro su alcune piattaforme)

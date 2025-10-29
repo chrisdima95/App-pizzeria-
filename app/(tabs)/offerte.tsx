@@ -1,7 +1,7 @@
 import { TabHeader } from "@/components/TabHeader";
 import { ThemedText } from "@/components/themed-text";
 import { PizzaWheel } from "@/components/ui";
-import { type Offer } from "@/components/ui/offer-carousel";
+import { type Offer } from "@/types/offer";
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { getAllOffers } from "@/data/offers";

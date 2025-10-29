@@ -1,5 +1,4 @@
 // Componenti UI personalizzati per la pizzeria
-export { OfferCarousel, type Offer } from "./offer-carousel";
 export { PizzaBadge } from "./pizza-badge";
 export { PizzaButton } from "./pizza-button";
 export { PizzaCard } from "./pizza-card";
