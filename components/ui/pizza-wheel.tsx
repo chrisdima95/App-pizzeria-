@@ -326,7 +326,7 @@ export function PizzaWheel({
           >
             <Animated.View style={styles.gestureContainer}>
               <Image
-                source={require("@/assets/images/ruota.png")}
+                source={require("@/assets/images/Ruota.png")}
                 style={styles.wheelImage}
                 resizeMode="contain"
               />
