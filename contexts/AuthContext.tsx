@@ -10,7 +10,6 @@ interface User {
   lastName?: string;
   email: string;
   birthDate?: string;
-  address?: string;
   isChef?: boolean; // Flag per identificare se l'utente è un chef
 }
 
@@ -22,7 +21,7 @@ interface AuthContextType {
   isChefAuthenticated: boolean; // Nuovo flag per Chef
   login: (email: string, password: string) => Promise<boolean>;
   chefLogin: (email: string, password: string) => Promise<boolean>; // Nuovo metodo per login Chef
-  register: (name: string, surname: string, email: string, password: string, address?: string) => Promise<boolean>;
+  register: (name: string, surname: string, email: string, password: string) => Promise<boolean>;
   updateUser: (userData: Partial<User>) => Promise<void>;
   logout: () => Promise<void>;
   chefLogout: () => Promise<void>; // Nuovo metodo per logout Chef
@@ -135,7 +134,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (name: string, surname: string, email: string, password: string, address?: string): Promise<boolean> => {
+  const register = async (name: string, surname: string, email: string, password: string): Promise<boolean> => {
     try {
       // Simula registrazione - in un'app reale qui faresti una chiamata API
       if (name && surname && email && password) {
@@ -144,7 +143,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           name: name.trim(),
           surname: surname.trim(),
           email: email.trim(),
-          address: address?.trim(),
           isChef: false
         };
         

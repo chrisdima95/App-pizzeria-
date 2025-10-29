@@ -31,6 +31,7 @@ const MAPPING = {
   xmark: "close",
   trash: "delete",
   power: "power-settings-new",
+  pencil: "edit",
 } as const;
 
 type IconSymbolName = keyof typeof MAPPING;

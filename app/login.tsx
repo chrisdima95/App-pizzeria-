@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { usePizzaModal } from '@/hooks/use-pizza-modal';
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 
 export default function LoginScreen() {
@@ -15,7 +15,6 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [surname, setSurname] = useState('');
-  const [address, setAddress] = useState('');
   const [emailError, setEmailError] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string>('');
   const [nameError, setNameError] = useState<string>('');
@@ -175,7 +174,7 @@ export default function LoginScreen() {
     setIsLoading(true);
     
     try {
-      const success = await register(name, surname, email, password, address);
+      const success = await register(name, surname, email, password);
       if (!success) {
         showModal('Errore', 'Si è verificato un errore durante la registrazione');
       }
@@ -194,7 +193,6 @@ export default function LoginScreen() {
     setPassword('');
     setName('');
     setSurname('');
-    setAddress('');
     setEmailError('');
     setPasswordError('');
     setNameError('');
@@ -326,22 +324,6 @@ export default function LoginScreen() {
           {hasSubmitted && passwordError ? (
             <ThemedText style={[styles.errorText, { color: colors.error }]}>{passwordError}</ThemedText>
           ) : null}
-
-          {!isLoginMode && (
-            <TextInput
-              style={[styles.input, { 
-                backgroundColor: colors.card, 
-                borderColor: colors.border,
-                color: colors.text 
-              }]}
-              placeholder="Indirizzo (opzionale)"
-              placeholderTextColor={colors.muted}
-              value={address}
-              onChangeText={setAddress}
-              autoCapitalize="words"
-              autoCorrect={false}
-            />
-          )}
 
           <TouchableOpacity 
             style={[

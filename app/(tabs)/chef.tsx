@@ -4,15 +4,15 @@ import { Colors } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { usePizzaModal } from "@/hooks/use-pizza-modal";
-import { router } from "expo-router";
 import * as Clipboard from "expo-clipboard";
-import React, { useEffect, useState } from "react";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
+    ActivityIndicator,
+    ScrollView,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
 } from "react-native";
 
 export default function ChefScreen() {

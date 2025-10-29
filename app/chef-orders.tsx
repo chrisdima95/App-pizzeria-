@@ -7,20 +7,26 @@ import { Colors } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
 import { OrderItem, useOrder } from '@/contexts/OrderContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { usePizzaModal } from '@/hooks/use-pizza-modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, Stack } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, TouchableOpacity, useColorScheme as useRNColorScheme, View } from 'react-native';
+
+type FilterType = 'pending' | 'completed';
 
 export default function ChefOrdersScreen() {
   const [allOrders, setAllOrders] = useState<OrderItem[][]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState<FilterType>('pending');
   const { chef, chefLogout, isChefAuthenticated } = useAuth();
   const { getAllOrders } = useOrder();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const rnColorScheme = useRNColorScheme();
+  const { showModal, ModalComponent } = usePizzaModal();
 
   // Verifica che l'utente sia un chef (ma non mostrare modale durante logout)
   useEffect(() => {
@@ -57,35 +63,47 @@ export default function ChefOrdersScreen() {
     }
   }, [chef]);
 
-  const handleLogout = async () => {
-    Alert.alert(
-      'Logout',
-      'Sei sicuro di voler uscire?',
-      [
-        { text: 'Annulla', style: 'cancel' },
-        { 
-          text: 'Esci', 
-          style: 'destructive',
-          onPress: async () => {
-            setIsLoggingOut(true);
-            await chefLogout();
-            router.replace('/(tabs)/chef');
-          }
+  const handleLogout = () => {
+    showModal('Logout', 'Sei sicuro di voler uscire?', [
+      { text: 'Annulla', style: 'cancel' },
+      { 
+        text: 'Esci', 
+        style: 'destructive',
+        onPress: async () => {
+          setIsLoggingOut(true);
+          await chefLogout();
+          router.replace('/(tabs)/chef');
         }
-      ]
-    );
+      }
+    ]);
   };
 
-  const updateOrderStatus = (orderIndex: number, itemIndex: number, newStatus: OrderItem['status']) => {
+  // Funzione per filtrare gli ordini in base allo stato
+  const getFilteredOrders = () => {
+    return allOrders.filter(order => {
+      // Un ordine è "pending" se ha almeno un item con status "pending"
+      // Un ordine è "completed" se tutti gli item sono completati (non pending)
+      const hasPendingItems = order.some(item => item.status === 'pending');
+      
+      if (selectedFilter === 'pending') {
+        return hasPendingItems;
+      } else {
+        // Per "completed", mostriamo gli ordini dove tutti gli item sono completati
+        return !hasPendingItems;
+      }
+    });
+  };
+
+  // Funzione per completare un intero ordine
+  const completeOrder = (orderIndex: number) => {
     setAllOrders(prev => {
       const updated = [...prev];
-      updated[orderIndex] = [...updated[orderIndex]];
-      updated[orderIndex][itemIndex] = {
-        ...updated[orderIndex][itemIndex],
-        status: newStatus
-      };
+      updated[orderIndex] = updated[orderIndex].map(item => ({
+        ...item,
+        status: 'completed' as const
+      }));
       
-      // Salva anche negli ordini globali
+      // Salva negli ordini globali
       try {
         const globalOrdersKey = 'globalOrders';
         AsyncStorage.setItem(globalOrdersKey, JSON.stringify(updated));
@@ -97,29 +115,31 @@ export default function ChefOrdersScreen() {
     });
   };
 
-  const getStatusColor = (status: OrderItem['status']) => {
-    switch (status) {
-      case 'pending': return PizzaColors.warning;
-      case 'preparing': return PizzaColors.info;
-      case 'ready': return PizzaColors.success;
-      case 'delivered': return PizzaColors.gray[500];
-      default: return colors.text;
-    }
+  // Funzione per riportare un ordine a "in attesa"
+  const markOrderAsPending = (orderIndex: number) => {
+    setAllOrders(prev => {
+      const updated = [...prev];
+      updated[orderIndex] = updated[orderIndex].map(item => ({
+        ...item,
+        status: 'pending' as const
+      }));
+      
+      // Salva negli ordini globali
+      try {
+        const globalOrdersKey = 'globalOrders';
+        AsyncStorage.setItem(globalOrdersKey, JSON.stringify(updated));
+      } catch (error) {
+        console.error('Errore nel salvataggio stato ordine:', error);
+      }
+      
+      return updated;
+    });
   };
 
-  const getStatusText = (status: OrderItem['status']) => {
-    switch (status) {
-      case 'pending': return 'In Attesa';
-      case 'preparing': return 'In Preparazione';
-      case 'ready': return 'Pronto';
-      case 'delivered': return 'Consegnato';
-      default: return status;
-    }
-  };
-
-  const renderOrderItem = ({ item, index: itemIndex, orderIndex }: { item: OrderItem; index: number; orderIndex: number }) => {
+  const renderOrderItem = ({ item, index: itemIndex }: { item: OrderItem; index: number }) => {
     const safePrice = item.price || 0;
     const safeQuantity = item.quantity || 0;
+    const isPending = item.status === 'pending';
     
     return (
       <View style={[styles.orderItem, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -137,35 +157,20 @@ export default function ChefOrdersScreen() {
           </View>
         </View>
 
-        <View style={styles.statusSection}>
-          <ThemedText style={[styles.statusLabel, { color: colors.muted }]}>Stato:</ThemedText>
-          <View style={styles.statusButtons}>
-            {(['pending', 'preparing', 'ready', 'delivered'] as const).map((status) => (
-              <TouchableOpacity
-                key={status}
-                style={[
-                  styles.statusButton,
-                  { 
-                    backgroundColor: item.status === status ? getStatusColor(status) : 'transparent',
-                    borderColor: getStatusColor(status)
-                  }
-                ]}
-                onPress={() => updateOrderStatus(orderIndex, itemIndex, status)}
-              >
-                <ThemedText 
-                  style={[
-                    styles.statusButtonText, 
-                    { 
-                      color: item.status === status ? 'white' : getStatusColor(status)
-                    }
-                  ]}
-                >
-                  {getStatusText(status)}
-                </ThemedText>
-              </TouchableOpacity>
-            ))}
+        {isPending && (
+          <View style={styles.statusSection}>
+            <ThemedText style={[styles.statusLabel, { color: colors.muted }]}>
+              Stato: In Attesa
+            </ThemedText>
           </View>
-        </View>
+        )}
+        {!isPending && (
+          <View style={styles.statusSection}>
+            <ThemedText style={[styles.statusLabel, { color: PizzaColors.success }]}>
+              Stato: Completato
+            </ThemedText>
+          </View>
+        )}
       </View>
     );
   };
@@ -178,11 +183,27 @@ export default function ChefOrdersScreen() {
       return sum + (safePrice * safeQuantity);
     }, 0);
 
+    // Verifica se l'ordine ha item in attesa o completati
+    const hasPendingItems = order.some(item => item.status === 'pending');
+    const isCompleted = !hasPendingItems;
+    
+    // Trova l'indice dell'ordine nell'array originale (non filtrato)
+    // Usa un metodo più robusto: confronta l'email utente e il totale per trovare l'ordine corrispondente
+    const originalOrderIndex = allOrders.findIndex(o => 
+      o.length > 0 && 
+      o[0]?.userEmail === order[0]?.userEmail &&
+      o.length === order.length &&
+      JSON.stringify(o.map(i => ({ id: i.id, quantity: i.quantity }))) === JSON.stringify(order.map(i => ({ id: i.id, quantity: i.quantity })))
+    );
+    
+    // Fallback: usa l'indice se non trovato
+    const safeOrderIndex = originalOrderIndex >= 0 ? originalOrderIndex : allOrders.findIndex(o => o === order);
+
     return (
       <View style={[styles.orderCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <View style={styles.orderHeader}>
           <ThemedText style={[styles.orderNumber, { color: colors.text }]}>
-            Ordine #{orderIndex + 1}
+            Ordine #{safeOrderIndex + 1}
           </ThemedText>
           <View style={styles.clientSection}>
             <ThemedText style={[styles.clientLabel, { color: colors.muted }]}>
@@ -196,7 +217,7 @@ export default function ChefOrdersScreen() {
         
         <FlatList
           data={order}
-          renderItem={({ item, index }) => renderOrderItem({ item, index, orderIndex })}
+          renderItem={({ item, index }) => renderOrderItem({ item, index })}
           keyExtractor={(item, index) => `${item.id}-${index}`}
           scrollEnabled={false}
           ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
@@ -208,6 +229,30 @@ export default function ChefOrdersScreen() {
           </ThemedText>
           <PizzaPrice price={totalAmount} size="large" />
         </View>
+
+        {/* Pulsante per completare l'ordine - mostra solo se l'ordine ha item in attesa */}
+        {hasPendingItems && selectedFilter === 'pending' && (
+          <TouchableOpacity
+            style={[styles.completeButton, { backgroundColor: colors.primary }]}
+            onPress={() => completeOrder(safeOrderIndex)}
+          >
+            <ThemedText style={styles.completeButtonText}>
+              Segna come completato
+            </ThemedText>
+          </TouchableOpacity>
+        )}
+
+        {/* Pulsante per riportare a "in attesa" - mostra solo per ordini completati */}
+        {isCompleted && selectedFilter === 'completed' && (
+          <TouchableOpacity
+            style={[styles.pendingButton, { backgroundColor: PizzaColors.warning }]}
+            onPress={() => markOrderAsPending(safeOrderIndex)}
+          >
+            <ThemedText style={styles.pendingButtonText}>
+              Contrassegna come in attesa
+            </ThemedText>
+          </TouchableOpacity>
+        )}
       </View>
     );
   };
@@ -226,6 +271,13 @@ export default function ChefOrdersScreen() {
       </ThemedView>
     );
   }
+
+  const filteredOrders = getFilteredOrders();
+
+  const filters: { key: FilterType; label: string }[] = [
+    { key: 'pending', label: 'In attesa' },
+    { key: 'completed', label: 'Completati' },
+  ];
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -251,20 +303,64 @@ export default function ChefOrdersScreen() {
         </TouchableOpacity>
       </View>
 
-      {allOrders.length === 0 ? (
+      {/* Barra di filtri */}
+      <View style={styles.filterBar}>
+        {filters.map((filter) => (
+          <TouchableOpacity
+            key={filter.key}
+            style={[
+              styles.filterButton,
+              {
+                backgroundColor:
+                  selectedFilter === filter.key 
+                    ? colors.primary 
+                    : rnColorScheme === 'dark' 
+                      ? colors.background 
+                      : 'white',
+                borderColor:
+                  selectedFilter === filter.key
+                    ? colors.primary
+                    : colors.border,
+              },
+            ]}
+            onPress={() => setSelectedFilter(filter.key)}
+          >
+            <ThemedText
+              style={[
+                styles.filterLabel,
+                {
+                  color:
+                    selectedFilter === filter.key 
+                      ? 'white' 
+                      : colors.text,
+                  fontWeight: selectedFilter === filter.key ? '600' : '400',
+                },
+              ]}
+            >
+              {filter.label}
+            </ThemedText>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {filteredOrders.length === 0 ? (
         <View style={styles.emptyContainer}>
           <View style={[styles.emptyCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <ThemedText style={[styles.emptyTitle, { color: colors.text }]}>
-              Nessun ordine disponibile
+              {selectedFilter === 'pending' 
+                ? 'Nessun ordine in attesa' 
+                : 'Nessun ordine completato'}
             </ThemedText>
             <ThemedText style={[styles.emptySubtext, { color: colors.muted }]}>
-              Gli ordini dei clienti appariranno qui quando effettueranno i loro acquisti
+              {selectedFilter === 'pending'
+                ? 'Gli ordini dei clienti appariranno qui quando effettueranno i loro acquisti'
+                : 'Non ci sono ancora ordini completati'}
             </ThemedText>
           </View>
         </View>
       ) : (
         <FlatList
-          data={allOrders}
+          data={filteredOrders}
           renderItem={renderOrder}
           keyExtractor={(_, index) => `order-${index}`}
           refreshControl={
@@ -279,6 +375,7 @@ export default function ChefOrdersScreen() {
           ItemSeparatorComponent={() => <View style={styles.orderSeparator} />}
         />
       )}
+      <ModalComponent />
     </View>
   );
 }
@@ -313,6 +410,25 @@ const styles = StyleSheet.create({
   logoutButtonText: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  filterBar: {
+    flexDirection: 'row',
+    marginHorizontal: 20,
+    marginBottom: 20,
+    gap: 12,
+  },
+  filterButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...PizzaColors.shadows.small,
+  },
+  filterLabel: {
+    fontSize: 16,
   },
   emptyContainer: {
     flex: 1,
@@ -423,22 +539,32 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     fontWeight: '600',
   },
-  statusButtons: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  statusButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 2,
-    minWidth: 100,
+  completeButton: {
+    marginTop: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
     alignItems: 'center',
-    ...PizzaColors.shadows.small,
+    justifyContent: 'center',
+    ...PizzaColors.shadows.medium,
   },
-  statusButtonText: {
-    fontSize: 13,
+  completeButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  pendingButton: {
+    marginTop: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...PizzaColors.shadows.medium,
+  },
+  pendingButtonText: {
+    color: 'white',
+    fontSize: 16,
     fontWeight: '600',
   },
 });
