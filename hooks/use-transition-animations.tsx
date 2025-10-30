@@ -10,6 +10,11 @@ interface TransitionAnimationsConfig {
   };
 }
 
+/**
+ * useTransitionAnimations: hook che restituisce animazioni standard di comparsa (fade/scale) per schermate/container.
+ * Serve a dare uniformità di presentazione/transizione UI in modo riutilizzabile e configurabile.
+ * startAnimations fa partire effettivamente le animazioni; backgroundAnimatedStyle va collassato direttamente in uno style Animated.
+ */
 export const useTransitionAnimations = (config: TransitionAnimationsConfig = {}) => {
   const {
     duration = 800,
@@ -21,7 +26,8 @@ export const useTransitionAnimations = (config: TransitionAnimationsConfig = {})
   const fadeProgress = useSharedValue(0);
   const scaleProgress = useSharedValue(0);
 
-  // Avvia solo le animazioni globali
+  // startAnimations lancia sequenza fade e scale secondo config passata
+  // backgroundAnimatedStyle: stile da applicare a container Animated.View
   const startAnimations = () => {
     fadeProgress.value = withTiming(1, { duration: duration * 0.8, easing: Easing.out(Easing.quad) });
     scaleProgress.value = withSpring(1, springConfig);

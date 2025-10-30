@@ -5,9 +5,7 @@ import { SymbolWeight } from "expo-symbols";
 import { OpaqueColorValue, type StyleProp, type TextStyle } from "react-native";
 
 /**
- * Add your SF Symbols to Material Icons mappings here.
- * - see Material Icons in the [Icons Directory](https://icons.expo.fyi).
- * - see SF Symbols in the [SF Symbols](https://developer.apple.com/sf-symbols/) app.
+ * MAPPING associa i nomi icona usati (in stile SF Symbols) alle corrispondenti MaterialIcons usate su Android/web
  */
 const MAPPING = {
   "house.fill": "home",
@@ -37,9 +35,8 @@ const MAPPING = {
 type IconSymbolName = keyof typeof MAPPING;
 
 /**
- * An icon component that uses native SF Symbols on iOS, and Material Icons on Android and web.
- * This ensures a consistent look across platforms, and optimal resource usage.
- * Icon `name`s are based on SF Symbols and require manual mapping to Material Icons.
+ * IconSymbol seleziona la MaterialIcon corrispondente al nome passato
+ * Serve per mantenere un design coerente tra iOS e Android/web
  */
 export function IconSymbol({
   name,

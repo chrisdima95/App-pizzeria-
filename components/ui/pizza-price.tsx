@@ -19,13 +19,14 @@ export function PizzaPrice({
   style,
   showCurrency = true,
 }: PizzaPriceProps) {
+  // Funzione per formattare l'importo in stringa con due decimali o restituire direttamente la stringa fornita
   const formatAmount = (value: number | string | null | undefined) => {
     if (value === null || value === undefined) return '0.00';
     if (typeof value === 'string') return value;
     return value.toFixed(2);
   };
 
-  // Usa 'price' se fornito, altrimenti usa 'amount'
+  // Sceglie quale valore usare (price o amount) per gestire compatibilità
   const actualAmount = price !== undefined ? price : amount;
 
   const getPriceStyle = () => {

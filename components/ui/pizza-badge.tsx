@@ -17,9 +17,10 @@ export function PizzaBadge({
   style,
   textStyle,
 }: PizzaBadgeProps) {
+  // Funzione che restituisce gli stili corretti per la variante del badge
   const getBadgeStyle = () => {
     const baseStyle = [styles.badge, styles[size]];
-    
+    // Cambia colore e bordo in base alla "variant"
     switch (variant) {
       case 'success':
         return [...baseStyle, styles.success];
@@ -38,9 +39,9 @@ export function PizzaBadge({
     }
   };
 
+  // Funzione che restituisce lo stile testo per la variante richiesta
   const getTextStyle = () => {
     const baseTextStyle = [styles.text, styles[`${size}Text`]];
-    
     switch (variant) {
       case 'success':
         return [...baseTextStyle, styles.successText];

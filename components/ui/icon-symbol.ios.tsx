@@ -1,6 +1,16 @@
 import { SymbolView, SymbolViewProps, SymbolWeight } from 'expo-symbols';
 import { StyleProp, ViewStyle } from 'react-native';
 
+/**
+ * MAPPING associa nomi simbolici (SF Symbols) alle Material Icons per uniformare l'esperienza tra iOS e altre piattaforme
+ */
+const MAPPING = {
+  // ... existing code ...
+};
+
+/**
+ * IconSymbol mostra una icona coerente tra iOS, Android e Web, selezionando il nome corretto a seconda della piattaforma
+ */
 export function IconSymbol({
   name,
   size = 24,

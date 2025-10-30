@@ -23,7 +23,7 @@ import {
   View,
 } from "react-native";
 
-// Funzioni per salvare/caricare la foto profilo
+// Salvataggio su storage async della foto profilo (persistente per utente)
 const saveProfileImage = async (uri: string | null, userId: string) => {
   try {
     if (uri) {
@@ -36,6 +36,7 @@ const saveProfileImage = async (uri: string | null, userId: string) => {
   }
 };
 
+// Caricamento della foto profilo custom da AsyncStorage (se presente)
 const loadProfileImage = async (userId: string): Promise<string | null> => {
   try {
     return await AsyncStorage.getItem(`profile_image_${userId}`);
@@ -58,10 +59,9 @@ export default function ProfiloScreen() {
   // Stati per i dati personali
   const [isEditing, setIsEditing] = useState(false);
   const [personalData, setPersonalData] = useState({
-    firstName: user?.firstName || "",
-    lastName: user?.lastName || "",
+    name: user?.name || "",
+    surname: user?.surname || "",
     email: user?.email || "",
-    birthDate: user?.birthDate || "",
   });
 
   // Stati per la foto profilo
@@ -72,10 +72,9 @@ export default function ProfiloScreen() {
   // Aggiorna i dati personali quando cambia l'utente
   React.useEffect(() => {
     setPersonalData({
-      firstName: user?.firstName || "",
-      lastName: user?.lastName || "",
+      name: user?.name || "",
+      surname: user?.surname || "",
       email: user?.email || "",
-      birthDate: user?.birthDate || "",
     });
   }, [user]);
 
@@ -100,6 +99,7 @@ export default function ProfiloScreen() {
   }, [cameraPermission, requestCameraPermission]);
 
   // Funzioni ausiliarie per le azioni
+  // Funzione che si occupa di scattare foto tramite fotocamera (gestione permessi camera su mobile)
   const handleTakePhoto = useCallback(async () => {
     if (!user) return;
     try {
@@ -144,7 +144,7 @@ export default function ProfiloScreen() {
     );
   }, [user]);
 
-  // Funzione per cambiare la foto profilo - usa ActionSheetIOS su iOS e Modal su Android
+  // Funzione che gestisce la selezione/cancellazione/modifica foto profilo (actionsheet su iOS, modal custom su Android)
   const handleChangeProfileImage = useCallback(() => {
     if (!user) return;
 
@@ -225,6 +225,7 @@ export default function ProfiloScreen() {
     router.push("/login");
   };
 
+  // Salvataggio dati personali utente (solo dopo modifica e pressione "Salva")
   const handleEditToggle = () => {
     if (isEditing) {
       // Salva i dati
@@ -240,80 +241,22 @@ export default function ProfiloScreen() {
     }
   };
 
+  // Ripristina i dati personali (abort modifica)
   const handleCancelEdit = () => {
     setPersonalData({
-      firstName: user?.firstName || "",
-      lastName: user?.lastName || "",
+      name: user?.name || "",
+      surname: user?.surname || "",
       email: user?.email || "",
-      birthDate: user?.birthDate || "",
     });
     setIsEditing(false);
   };
 
+  // Aggiorna uno specifico campo dei dati personali
   const handleInputChange = (field: string, value: string) => {
     setPersonalData((prev) => ({
       ...prev,
       [field]: value,
     }));
-  };
-
-  const formatBirthDate = (text: string) => {
-    // Rimuovi tutti i caratteri non numerici
-    const numbersOnly = text.replace(/[^0-9]/g, "");
-
-    // Limita a 8 cifre (GGMMAAAA)
-    const limited = numbersOnly.slice(0, 8);
-
-    // Validazione per giorni, mesi e anni
-    if (limited.length >= 2) {
-      const day = parseInt(limited.slice(0, 2));
-      if (day > 31 || day < 1) {
-        return limited.slice(0, 1); // Permetti solo la prima cifra valida
-      }
-    }
-
-    if (limited.length >= 4) {
-      const month = parseInt(limited.slice(2, 4));
-      if (month > 12 || month < 1) {
-        return limited.slice(0, 3); // Ferma alla terza cifra se mese invalido
-      }
-    }
-
-    if (limited.length >= 8) {
-      const year = parseInt(limited.slice(4, 8));
-      const currentYear = new Date().getFullYear();
-      if (year < 1900 || year > currentYear) {
-        return limited.slice(0, 7); // Ferma alla settima cifra se anno invalido
-      }
-    }
-
-    // Validazione giorni per mese specifico (quando abbiamo giorno, mese e anno completi)
-    if (limited.length >= 8) {
-      const day = parseInt(limited.slice(0, 2));
-      const month = parseInt(limited.slice(2, 4));
-      const year = parseInt(limited.slice(4, 8));
-
-      const daysInMonth = new Date(year, month, 0).getDate();
-      if (day > daysInMonth) {
-        return limited.slice(0, 7); // Ferma alla settima cifra se giorno invalido per quel mese
-      }
-    }
-
-    // Aggiungi gli slash automaticamente
-    if (limited.length <= 2) {
-      return limited;
-    } else if (limited.length <= 4) {
-      return `${limited.slice(0, 2)}/${limited.slice(2)}`;
-    } else {
-      return `${limited.slice(0, 2)}/${limited.slice(2, 4)}/${limited.slice(
-        4
-      )}`;
-    }
-  };
-
-  const handleBirthDateChange = (value: string) => {
-    const formatted = formatBirthDate(value);
-    handleInputChange("birthDate", formatted);
   };
 
   const menuItems = [
@@ -391,9 +334,9 @@ export default function ProfiloScreen() {
                 <IconSymbol size={14} name="pencil" color="white" />
               </View>
             </TouchableOpacity>
-            {Boolean(user?.name?.trim()) && (
+            {Boolean((user?.name?.trim() || user?.surname?.trim())) && (
               <ThemedText type="subtitle" style={styles.userName}>
-                {user!.name}
+                {`${user!.name || ''} ${user!.surname || ''}`.trim()}
               </ThemedText>
             )}
             <ThemedText style={[styles.userEmail, { color: colors.muted }]}>
@@ -440,9 +383,9 @@ export default function ProfiloScreen() {
                           color: colors.text,
                         },
                       ]}
-                      value={personalData.firstName}
+                      value={personalData.name}
                       onChangeText={(value) =>
-                        handleInputChange("firstName", value)
+                        handleInputChange("name", value)
                       }
                       placeholder="Inserisci il nome"
                       placeholderTextColor={colors.muted}
@@ -451,7 +394,7 @@ export default function ProfiloScreen() {
                     <ThemedText
                       style={[styles.fieldValue, { color: colors.text }]}
                     >
-                      {personalData.firstName || "Non specificato"}
+                      {personalData.name || "Non specificato"}
                     </ThemedText>
                   )}
                 </View>
@@ -471,9 +414,9 @@ export default function ProfiloScreen() {
                           color: colors.text,
                         },
                       ]}
-                      value={personalData.lastName}
+                      value={personalData.surname}
                       onChangeText={(value) =>
-                        handleInputChange("lastName", value)
+                        handleInputChange("surname", value)
                       }
                       placeholder="Inserisci il cognome"
                       placeholderTextColor={colors.muted}
@@ -482,7 +425,7 @@ export default function ProfiloScreen() {
                     <ThemedText
                       style={[styles.fieldValue, { color: colors.text }]}
                     >
-                      {personalData.lastName || "Non specificato"}
+                      {personalData.surname || "Non specificato"}
                     </ThemedText>
                   )}
                 </View>
@@ -516,38 +459,6 @@ export default function ProfiloScreen() {
                     style={[styles.fieldValue, { color: colors.text }]}
                   >
                     {personalData.email || "Non specificato"}
-                  </ThemedText>
-                )}
-              </View>
-
-              <View style={styles.fieldContainer}>
-                <ThemedText
-                  style={[styles.fieldLabel, { color: colors.muted }]}
-                >
-                  Data di nascita
-                </ThemedText>
-                {isEditing ? (
-                  <TextInput
-                    style={[
-                      styles.fieldInput,
-                      {
-                        backgroundColor: colors.background,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      },
-                    ]}
-                    value={personalData.birthDate}
-                    onChangeText={handleBirthDateChange}
-                    placeholder="GG/MM/AAAA"
-                    placeholderTextColor={colors.muted}
-                    keyboardType="numeric"
-                    maxLength={10}
-                  />
-                ) : (
-                  <ThemedText
-                    style={[styles.fieldValue, { color: colors.text }]}
-                  >
-                    {personalData.birthDate || "Non specificato"}
                   </ThemedText>
                 )}
               </View>

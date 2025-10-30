@@ -38,6 +38,7 @@ export function PizzaModal({
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
+  // Animazioni di comparsa (fade-in e zoom) del Modal
   useEffect(() => {
     if (visible) {
       Animated.parallel([
@@ -69,21 +70,23 @@ export function PizzaModal({
     }
   }, [visible, fadeAnim, scaleAnim]);
 
+  // Gestisce la pressione sui pulsanti del Modal
   const handleButtonPress = (button: PizzaModalButton) => {
     if (button.onPress) {
       button.onPress();
     }
-    // Chiudi sempre il modal quando un pulsante viene premuto
+    // Chiude sempre il modal quando si preme un pulsante
     if (onClose) {
       onClose();
     }
   };
 
+  // Genera dinamicamente lo stile dei pulsanti in base allo stile logico (default/cancel/destructive)
   const getButtonStyle = (style?: string) => {
     switch (style) {
       case "destructive":
         return {
-          backgroundColor: colors.primary, // Usa il colore primario marrone invece di error
+          backgroundColor: colors.primary, // Usa marrone invece di error per coerenza visiva
         };
       case "cancel":
         return {
@@ -98,6 +101,7 @@ export function PizzaModal({
     }
   };
 
+  // Restituisce il colore testo in base allo stile pulsante
   const getButtonTextColor = (style?: string) => {
     switch (style) {
       case "cancel":

@@ -1,29 +1,28 @@
 /**
- * Colori personalizzati per l'app della pizzeria
- * Palette calda e appetitosa ispirata ai colori della pizza
+ * Colori personalizzati per l'app della pizzeria.
+ * La palette si basa su toni caldi (marrone pizza, verde basilico, arancio, rosso pomodoro) coerenti con il brand.
  */
-
 export const PizzaColors = {
-  // Colori principali
-  primary: "#703537", // Marrone scuro per bottoni e elementi principali
-  secondary: "#38A169", // Verde basilico standardizzato
-  accent: "#F6AD55", // Arancione caldo
+  // Colori principali per branding/app (usati in bottoni, header, elementi dominanti)
+  primary: "#703537", // Marrone scuro per bottoni
+  secondary: "#38A169", // Verde tipico del basilico
+  accent: "#F6AD55", // Arancio per highlights e azioni
 
-  // Colori di stato
-  success: "#22C55E", // Verde brillante per successi - distintivo dal secondary
-  warning: "#F6AD55", // Arancione per avvisi
-  error: "#DC2626", // Rosso acceso per errori - distintivo dal rosso pomodoro
-  info: "#3182CE", // Blu per informazioni
-  
-  // Colori speciali per elementi di urgenza e highlights
-  urgent: "#E53E3E", // Rosso pomodoro per elementi di urgenza
-  highlight: "#F6E05E", // Giallo mozzarella per highlights
+  // Colori per stato (`success`, `warning`, ecc...): da usare per badge, alert, notifiche
+  // Success = verde diverso da secondary; Warning = tono arancio; Error = rosso acceso
+  success: "#22C55E", 
+  warning: "#F6AD55",
+  error: "#DC2626",
+  info: "#3182CE", // Informazioni neutre con blu
 
-  // Colori neutri
-  white: "#FFFFFF",
-  black: "#000000",
+  // Colori d'urgenza/highlights (es. offerte urgenti, attenzione, promozioni):
+  urgent: "#E53E3E", // Rosso pomodoro
+  highlight: "#F6E05E", // Giallo mozzarella
+
+  // Grigi "semanticizzati" per sfondi, bordi, testo secondario/primario, usando una scala simile a Tailwind (50-900)
+  // Più il valore è alto, più scuro
   gray: {
-    50: "#ffeec9", // Sfondo principale
+    50: "#ffeec9", // Sfondo principale più chiaro
     100: "#EDF2F7", // Sfondo secondario
     200: "#E2E8F0", // Bordi
     300: "#CBD5E0", // Bordi scuri
@@ -35,16 +34,16 @@ export const PizzaColors = {
     900: "#171923", // Sfondo molto scuro
   },
 
-  // Colori specifici per la pizzeria
+  // Colori pizza figurativi, per branding/mascotte/icona
   pizza: {
-    crust: "#D69E2E", // Colore della crosta
-    sauce: "#E53E3E", // Colore del pomodoro
-    cheese: "#F6E05E", // Colore della mozzarella
-    basil: "#38A169", // Colore del basilico
-    pepperoni: "#C53030", // Colore del salame
+    crust: "#D69E2E",
+    sauce: "#E53E3E",
+    cheese: "#F6E05E",
+    basil: "#38A169",
+    pepperoni: "#C53030",
   },
 
-  // Gradienti
+  // Gradients usati per effetti sfumatura su bottoni/componenti
   gradients: {
     primary: ["#703537", "#5C2D2A"],
     secondary: ["#38A169", "#2F855A"],
@@ -54,7 +53,7 @@ export const PizzaColors = {
     highlight: ["#F6E05E", "#F4D03F"],
   },
 
-  // Ombre
+  // Ombre uniformi per elementi "elevati" (usati da componenti UI)
   shadows: {
     small: {
       shadowColor: "#703537",

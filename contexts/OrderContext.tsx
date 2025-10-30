@@ -56,8 +56,9 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
     lastWheelSpinTimestamp: `lastWheelSpin_${userId}`,
   });
 
-  // Carica ordini e storico all'avvio o quando cambia l'utente
+  // Quando cambia utente/e stato autenticazione, ricarica da AsyncStorage lo stato del carrello, storico ordini e timestamp ruota
   useEffect(() => {
+    // loadPersistedOrders: carica dati personali/storico/offerte ruota dallo storage AsyncStorage su login/cambio user
     const loadPersistedOrders = async () => {
       if (!isAuthenticated || !user) {
         // Se non autenticato, svuota tutto
@@ -132,8 +133,9 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
     loadPersistedOrders();
   }, [user, isAuthenticated]);
 
-  // Salva carrello su storage a ogni modifica
+  // Salva carrello (orders) su AsyncStorage ogni volta che cambia lo stato ordini
   useEffect(() => {
+    // Salva carrello su storage a ogni modifica
     const persistOrders = async () => {
       if (!isAuthenticated || !user) return;
 
@@ -147,8 +149,9 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
     persistOrders();
   }, [orders, user, isAuthenticated]);
 
-  // Salva storico su storage a ogni modifica
+  // Salva storico ordini (completedOrders) su storage ogni volta che viene aggiornata la cronologia ordini
   useEffect(() => {
+    // Salva storico su storage a ogni modifica
     const persistHistory = async () => {
       if (!isAuthenticated || !user) return;
 
@@ -165,8 +168,9 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
     persistHistory();
   }, [completedOrders, user, isAuthenticated]);
 
-  // Salva offerte riscattate su storage a ogni modifica
+  // Salva offerte riscattate su storage ogni volta che vengono aggiornate
   useEffect(() => {
+    // Salva offerte riscattate su storage a ogni modifica
     const persistRedeemedOffers = async () => {
       if (!isAuthenticated || !user) return;
 
@@ -183,8 +187,9 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
     persistRedeemedOffers();
   }, [redeemedOffers, user, isAuthenticated]);
 
-  // Salva timestamp ultimo utilizzo ruota su storage a ogni modifica
+  // Salva timestamp ultimo utilizzo ruota su storage (usato per il cooldown di 24h)
   useEffect(() => {
+    // Salva timestamp ultimo utilizzo ruota su storage a ogni modifica
     const persistWheelTimestamp = async () => {
       if (!isAuthenticated || !user) return;
 
@@ -205,6 +210,7 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
     persistWheelTimestamp();
   }, [lastWheelSpinTimestamp, user, isAuthenticated]);
 
+  // Aggiunge un ordine. Se già esistente ID, incrementa la quantità; altrimenti aggiunge nuovo ordine.
   const addToOrder = (item: Omit<OrderItem, "status">) => {
     setOrders((prev) => {
       const existing = prev.find((o) => o.id === item.id);
@@ -236,6 +242,7 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
 
   const clearOrder = () => setOrders([]);
 
+  // Conferma ordine come utente registrato: aggiunge ordine a history utente e, se l'ordine contiene offerte speciali, aggiorna redeemedOffers e imposta/aggiorna il timestamp per cooldown ruota
   const confirmOrder = async () => {
     if (!orders.length || !user) return;
 
@@ -278,7 +285,7 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
     setOrders([]);
   };
 
-  // Funzione per confermare ordini come ospite (non loggato)
+  // Conferma ordine come ospite (non autenticato): salvo solo su storage globale chef e non aggiorno le offerte redeemate
   const confirmOrderAsGuest = async () => {
     if (!orders.length) return;
 
@@ -303,6 +310,7 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
     setOrders([]);
   };
 
+  // Reset al cooldown della ruota (richiamato su login/logout o cambio utente)
   const resetWheelCooldown = () => {
     setLastWheelSpinTimestamp(null);
   };
@@ -336,6 +344,8 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
     });
   }, [registerLogoutCallback]); // Esegui quando cambia il registratore
 
+  // Uso delle prop redeem/offerte/cooldown:
+  // redeemedOffers = offerte già riscattate dalla ruota; lastWheelSpinTimestamp = quando è stata girata l'ultima volta la ruota; hasOfferInCart = impedisce di riscattare più di una offerta simultaneamente. Queste logiche governano OFFERTA e COOLDOWN dello user.
   return (
     <OrderContext.Provider
       value={{

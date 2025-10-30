@@ -5,18 +5,20 @@
 
 import { Platform } from "react-native";
 
-// Colori tema pizzeria - palette calda e appetitosa
-const tintColorLight = "#703537"; // Marrone scuro per elementi attivi
-const tintColorDark = "#F6AD55"; // Arancione caldo
-
+/**
+ * Colors contiene la palette sia per il tema chiaro che scuro.
+ * Alcuni colori cambiano (es: background, primary), altri restano simili per coerenza brand.
+ * Si mappa sempre la stessa semantica (primary = azioni dominanti, secondary = highlights...)
+ */
 export const Colors = {
   light: {
+    // Colori chiari per UI day/light
     text: "#2D1B1B", // Marrone molto scuro per testi - miglior contrasto (4.5:1)
     background: "#ffeec9", // Beige crema per sfondi
-    tint: tintColorLight,
+    tint: "#703537", // Marrone scuro per elementi attivi
     icon: "#718096", // Grigio medio
     tabIconDefault: "#A0AEC0", // Grigio chiaro
-    tabIconSelected: tintColorLight,
+    tabIconSelected: "#703537", // Marrone scuro per elementi attivi
     // Colori aggiuntivi per la pizzeria
     primary: "#703537", // Marrone scuro per bottoni e elementi principali
     secondary: "#38A169", // Verde basilico standardizzato
@@ -31,12 +33,13 @@ export const Colors = {
     muted: "#718096", // Grigio per testi secondari
   },
   dark: {
+    // Palette dark: mantiene i richiami "pizza" ma più profondi/marroni
     text: "#F7FAFC", // Beige crema per testi
     background: "#1A202C", // Marrone molto scuro
-    tint: tintColorDark,
+    tint: "#F6AD55", // Arancione caldo
     icon: "#A0AEC0", // Grigio chiaro
     tabIconDefault: "#718096", // Grigio medio
-    tabIconSelected: tintColorDark,
+    tabIconSelected: "#F6AD55", // Arancione caldo
     // Colori aggiuntivi per la pizzeria
     primary: "#8B4513", // Marrone più chiaro per coerenza brand
     secondary: "#38A169", // Verde basilico standardizzato - stesso verde light mode
@@ -52,6 +55,10 @@ export const Colors = {
   },
 };
 
+/**
+ * Fonts definisce la mappatura delle famiglie font usate nell'app su tutte le piattaforme (iOS, Android/Web) per coerenza tipografica.
+ * Serve per evitare incoerenze nei componenti cross-platform.
+ */
 export const Fonts = Platform.select({
   ios: {
     /** iOS `UIFontDescriptorSystemDesignDefault` */
@@ -64,12 +71,14 @@ export const Fonts = Platform.select({
     mono: "ui-monospace",
   },
   default: {
+    // fallback predefinito Android
     sans: "normal",
     serif: "serif",
     rounded: "normal",
     mono: "monospace",
   },
   web: {
+    // Per la web app si usano le alternative tipiche sans-serif-web
     sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
     serif: "Georgia, 'Times New Roman', serif",
     rounded:

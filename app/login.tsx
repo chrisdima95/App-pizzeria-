@@ -26,7 +26,7 @@ export default function LoginScreen() {
   const colors = Colors[colorScheme ?? 'light'];
   const { showModal, ModalComponent } = usePizzaModal();
 
-  // Redirect se già autenticato
+  // Redirect automatico se già autenticato
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
       router.replace('/(tabs)');
@@ -50,6 +50,7 @@ export default function LoginScreen() {
     return null;
   }
 
+  // Funzione per validare i campi del form (login/registrazione)
   const validateForm = () => {
     let isValid = true;
     
@@ -95,6 +96,7 @@ export default function LoginScreen() {
     return isValid;
   };
 
+  // Login: effettua login, mostra modale errore in caso di chef già loggato o credenziali errate
   const handleLogin = async () => {
     setHasSubmitted(true);
 
@@ -140,6 +142,7 @@ export default function LoginScreen() {
     }
   };
 
+  // Registrazione: gestisce validazione, controlli chef, form e chiamata di register
   const handleRegister = async () => {
     setHasSubmitted(true);
 

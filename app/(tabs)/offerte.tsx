@@ -24,7 +24,9 @@ export default function OfferteScreen() {
   const { isAuthenticated } = useAuth();
   const { showModal, ModalComponent } = usePizzaModal();
 
+  // Funzione che viene chiamata quando un'offerta viene selezionata dalla ruota
   const handleSelectOffer = (offer: Offer) => {
+    // Utente non autenticato: obbliga a registrarsi per riscattare offerta
     if (!isAuthenticated) {
       showModal(
         "Registrazione richiesta",
@@ -40,7 +42,7 @@ export default function OfferteScreen() {
       return;
     }
 
-    // Se nel carrello c'è già un'offerta, impedisci di aggiungerne un'altra
+    // Se c'è già un'offerta nel carrello, impedisce di aggiungerne altre
     const offerIdSet = new Set(getAllOffers().map(o => o.id));
     const hasOfferInCart = orders.some(o => offerIdSet.has(o.id));
     if (hasOfferInCart) {
@@ -51,7 +53,7 @@ export default function OfferteScreen() {
       return;
     }
 
-    // Controlla se l'offerta è già stata riscattata
+    // Offerta già riscattata in passato: blocca doppio riscatto
     if (redeemedOffers.includes(offer.id)) {
       showModal(
         "Offerta già riscattata",
@@ -60,6 +62,7 @@ export default function OfferteScreen() {
       return;
     }
 
+    // Se tutto ok, aggiunge offerta al carrello e fa partire checkout
     addToOrder({
       id: offer.id,
       name: offer.name,

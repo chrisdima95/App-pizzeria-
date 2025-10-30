@@ -2,6 +2,7 @@ import { CooldownModal } from "@/components/ui/cooldown-modal";
 import { useOrder } from "@/contexts/OrderContext";
 import { useCallback, useEffect, useState } from "react";
 
+// Hook custom che gestisce la logica di cooldown della ruota della fortuna (regole business: solo 1 giro ogni 24h e 1 offerta riscattata per ordine/cartello)
 const COOLDOWN_HOURS = 24;
 const COOLDOWN_MS = COOLDOWN_HOURS * 60 * 60 * 1000; // 24 ore in millisecondi
 
@@ -11,8 +12,9 @@ export const useWheelCooldown = () => {
   const [isOnCooldown, setIsOnCooldown] = useState<boolean>(false);
   const [showCooldownModal, setShowCooldownModal] = useState<boolean>(false);
 
-  // Calcola il tempo rimanente
+  // Calcola quanto tempo manca prima di poter rigirare la ruota (controllo timestamp su ordine/redeem)
   const calculateTimeRemaining = useCallback(() => {
+    // Se user non ha ancora mai girato la ruota, tutto ok
     if (!lastWheelSpinTimestamp) {
       setTimeRemaining(0);
       setIsOnCooldown(false);
@@ -66,27 +68,18 @@ export const useWheelCooldown = () => {
     setShowCooldownModal(false);
   }, []);
 
-  // Verifica se può girare la ruota
-  // Regole:
-  // - Se c'è già un'offerta nel carrello, non può girare di nuovo finché non conferma o rimuove l'offerta
-  // - Se non ci sono offerte riscattate, può girare
-  // - Se ha riscattato e confermato, vale il cooldown di 24h
+  // Verifica se l'utente può realmente girare la ruota
+  // Rules: non deve avere offerta in carrello, se ha già riscattato può solo dopo COOLDOWN_MS
   const canSpinWheel = useCallback(() => {
     if (hasOfferInCart) return false;
-    // Se non ci sono offerte riscattate, può sempre girare la ruota
     if (redeemedOffers.length === 0) return true;
-    
-    // Se non c'è timestamp dell'ultimo utilizzo, può girare
     if (!lastWheelSpinTimestamp) return true;
-    
     const now = Date.now();
     const timeSinceLastSpin = now - lastWheelSpinTimestamp;
-    
-    // Può girare solo se è passato il tempo di cooldown
     return timeSinceLastSpin >= COOLDOWN_MS;
   }, [lastWheelSpinTimestamp, redeemedOffers.length, hasOfferInCart]);
 
-  // Gestisce il tentativo di girare la ruota
+  // Quando tenti giro ruota: se regole non rispettate mostra modale di blocco, altrimenti true
   const handleSpinAttempt = useCallback(() => {
     if (!canSpinWheel()) {
       showCooldownModalHandler();
@@ -95,6 +88,7 @@ export const useWheelCooldown = () => {
     return true;
   }, [canSpinWheel, showCooldownModalHandler]);
 
+  // Elemento React pronto da renderizzare con il modale che mostra il countdown attivo (giorno, ora, secondi mancanti)
   const CooldownElement = (
     <CooldownModal
       visible={showCooldownModal}
@@ -103,6 +97,7 @@ export const useWheelCooldown = () => {
     />
   );
 
+  // Restituisce API usabile nei componenti consumer per sapere se mostrarsi/abilitare pulsanti o mostrare avviso di blocco
   return {
     isOnCooldown,
     timeRemaining,

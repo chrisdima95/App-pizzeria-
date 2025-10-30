@@ -41,14 +41,17 @@ export function PizzaWheel({
 
   const [isSpinning, setIsSpinning] = useState(false);
 
+  // Inizializza valore animato per la rotazione della ruota
   const spinValue = useRef(new Animated.Value(0)).current;
   const scaleValue = useRef(new Animated.Value(1)).current;
 
+  // Funzione di reset dello stato della ruota dopo una giocata
   const resetWheelState = () => {
     setIsSpinning(false);
     spinValue.setValue(0);
   };
 
+  // Funzione che avvia l'animazione e la logica di scelta dell'offerta casuale
   const spinWheel = () => {
     if (isSpinning || disabled) return;
 
@@ -58,6 +61,7 @@ export function PizzaWheel({
 
     setIsSpinning(true);
 
+    // Piccola animazione "mini-zoom" iniziale
     Animated.sequence([
       Animated.timing(scaleValue, {
         toValue: 0.95,
@@ -71,6 +75,7 @@ export function PizzaWheel({
       }),
     ]).start();
 
+    // Calcola quante rotazioni fare e l'angolo di stop casuale
     const randomSpins = 5 + Math.random() * 3;
     const randomAngle = Math.random() * 360;
     const totalRotation = randomSpins * 360 + randomAngle;
@@ -83,6 +88,7 @@ export function PizzaWheel({
         return 1 - Math.pow(1 - t, 3);
       },
     }).start(() => {
+      // Logica per determinare quale fetta viene selezionata
       const normalizedAngle = (360 - (totalRotation % 360)) % 360;
       const sliceAngle = 360 / offers.length;
       const selectedIndex = Math.floor(normalizedAngle / sliceAngle);
@@ -96,6 +102,7 @@ export function PizzaWheel({
     });
   };
 
+  // Funzione che mostra la modale al termine dell'animazione (offerta vinta)
   const showOfferResult = (offer: Offer) => {
     const message = `Offerta selezionata: ${
       offer.name

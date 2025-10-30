@@ -19,7 +19,7 @@ export function TabHeader({
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Logo della mascotte */}
+      {/* Se showMascotte è true, mostrare la mascotte come logo in alto */}
       {showMascotte && (
         <View style={styles.logoContainer}>
           <Image
@@ -30,9 +30,10 @@ export function TabHeader({
         </View>
       )}
 
-      {/* Titolo e sottotitolo - solo se forniti */}
+      {/* Mostra le intestazioni solo se i testi sono passati via prop */}
       {(title || subtitle) && (
         <View style={styles.textContainer}>
+          {/* Titolo principale */}
           {title && (
             <ThemedText
               type="title"
@@ -41,6 +42,7 @@ export function TabHeader({
               {title}
             </ThemedText>
           )}
+          {/* Sottotitolo sotto al titolo */}
           {subtitle && (
             <ThemedText style={[styles.subtitle, { color: colors.muted }]}>
               {subtitle}

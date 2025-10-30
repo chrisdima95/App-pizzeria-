@@ -15,6 +15,7 @@ export function PizzaTitle({
   style,
   color = 'dark',
 }: PizzaTitleProps) {
+  // Funzione che costruisce dinamicamente lo stile del titolo in base a livello e colore
   const getTitleStyle = () => {
     const baseStyle = [styles.title, styles[`h${level}`]];
     

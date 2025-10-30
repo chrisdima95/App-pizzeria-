@@ -5,8 +5,8 @@ import {
 } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import "react-native-reanimated";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import "react-native-reanimated";
 
 import { AuthProvider } from "@/contexts/AuthContext";
 import { OrderProvider } from "@/contexts/OrderContext";
@@ -17,13 +17,17 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      {/* Provider per i gesture handler necessari a livello root dell'app Expo/React Native */}
+      {/* Provider per autenticazione utente */}
       <AuthProvider>
+        {/* Provider ordini, tiene gli stati relativi agli ordini globali */}
         <OrderProvider>
+          {/* ThemeProvider gestisce colore e tema (chiaro/scuro) a livello di tutto il Navigator */}
           <ThemeProvider
             value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
           >
             <Stack>
-              {/* Schermate principali */}
+              {/* Schermate principali dell'app (menu, login, tabs, dettagli, ecc) */}
               <Stack.Screen
                 name="index"
                 options={{

@@ -4,7 +4,7 @@ import { Colors } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { router } from "expo-router";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { ActivityIndicator, Image, Platform, StyleSheet } from "react-native";
 
 export default function WelcomeScreen() {
@@ -12,6 +12,7 @@ export default function WelcomeScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
 
+  // useEffect per auto-redirect alla home delle tabs dopo 2 secondi
   useEffect(() => {
     // Attendi 2 secondi prima di navigare
     const timer = setTimeout(() => {
@@ -24,7 +25,7 @@ export default function WelcomeScreen() {
     return () => clearTimeout(timer);
   }, [isLoading]);
 
-  // Mostra loading se l'auth è in caricamento
+  // Se l'autenticazione è ancora in caricamento mostra spinner di loading
   if (isLoading) {
     return (
       <ThemedView style={styles.container}>

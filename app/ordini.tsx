@@ -35,7 +35,7 @@ export default function OrdiniScreen() {
   const { user, isAuthenticated } = useAuth();
   const { completedOrders } = useOrder();
 
-  // Trasforma completedOrders in OrderGroup per la visualizzazione
+  // Trasforma gli ordini completati in gruppi per la visualizzazione
   const orderGroups: OrderGroup[] = completedOrders.map((orderGroup, index) => {
     const total = orderGroup.reduce(
       (sum, item) => sum + item.price * item.quantity,
@@ -49,7 +49,7 @@ export default function OrdiniScreen() {
     };
   });
 
-  // Se non autenticato, mostra un messaggio
+  // Se l'utente non è autenticato, mostra messaggio esplicito
   if (!isAuthenticated || !user) {
     return (
       <ThemedView
@@ -87,6 +87,7 @@ export default function OrdiniScreen() {
     );
   }
 
+  // Renderizza un gruppo di ordini passato come item (visualizzazione lista di pizze e totale)
   const renderOrderGroup = ({ item }: { item: OrderGroup }) => (
     <View
       style={[

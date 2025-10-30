@@ -17,6 +17,7 @@ export function PizzaDivider({
   orientation = 'horizontal',
   margin = 'medium',
 }: PizzaDividerProps) {
+  // Calcola lo stile del divisore in base a orientamento, colore, dimensioni e margine
   const getDividerStyle = () => {
     const baseStyle = [styles.divider, styles[orientation], styles[thickness], styles[`${color}Color`], styles[`${margin}Margin`]];
     return [...baseStyle];

@@ -78,30 +78,30 @@ export default function PizzaDetailsScreen() {
   const [showCustomizations, setShowCustomizations] = useState(false);
   const [animationValue] = useState(new Animated.Value(1));
 
-  // Calcola il prezzo totale
+  // Calcola il prezzo base e aggiunge il prezzo di ogni personalizzazione selezionata
   const basePrice = pizzaPrice;
   const customizationPrice = customizations
     .filter((c) => c.selected)
     .reduce((sum, c) => sum + c.price, 0);
   const totalPrice = (basePrice + customizationPrice) * quantity;
 
-  // Non serve resettare perché ogni aggiunta crea un record separato con timestamp
-
-  // Funzioni di gestione
+  // Permette solo quantità tra 1 e 10 per ordine
   const setLocalQuantity = (newQuantity: number) => {
     if (newQuantity >= 1 && newQuantity <= 10) {
       setQuantity(newQuantity);
     }
   };
 
+  // Selezione/deselezione personalizzazioni
   const toggleCustomization = (id: string) => {
     setCustomizations((prev) =>
       prev.map((c) => (c.id === id ? { ...c, selected: !c.selected } : c))
     );
   };
 
+  // Funzione principale per aggiungere pizza al carrello (nome, id e prezzo calcolato)
   const handleAddToOrder = () => {
-    // Animazione di aggiunta
+    // Animazione visiva breve per feedback
     Animated.sequence([
       Animated.timing(animationValue, {
         toValue: 1.2,
@@ -115,29 +115,24 @@ export default function PizzaDetailsScreen() {
       }),
     ]).start();
 
-    // Crea il nome personalizzato
+    // Testo della pizza con personalizzazioni indicato nelle []
     const selectedCustomizations = customizations.filter((c) => c.selected);
     const customizationText =
       selectedCustomizations.length > 0
         ? ` (${selectedCustomizations.map((c) => c.name).join(", ")})`
         : "";
-
     const customPizzaName = `${pizzaName}${customizationText}`;
 
-    // Crea un ID basato su pizza, personalizzazioni e note
+    // Generazione di ID univoco per ogni aggiunta (usa anche timestamp)
     const customizationIds = selectedCustomizations.map((c) => c.id).join(",");
     const notesHash =
       specialNotes.trim().length > 0
         ? `_${specialNotes.trim().replace(/\s+/g, "_")}`
         : "";
-
-    // Crea SEMPRE un ID univoco includendo un timestamp
-    // Questo garantisce che ogni aggiunta dalla pagina dettagli crei un record SEPARATO
     const timestamp = Date.now();
     const itemId = `${pizzaId}_${customizationIds}${notesHash}_${timestamp}`;
 
-    // Crea SEMPRE un nuovo record usando setOrders direttamente
-    // Questo garantisce che non ci sia conflitto con ordini esistenti
+    // Aggiunge la pizza (anche se "duplicata" con altro id/variante/nota: sempre linea separata)
     setOrders((prev) => [
       ...prev,
       {
@@ -151,7 +146,7 @@ export default function PizzaDetailsScreen() {
     ]);
     setIsInCart(true);
 
-    // Notifica pizza aggiunta
+    // Mostra modale di conferma, azione "vai al carrello" o continua
     showModal(
       "Pizza aggiunta!",
       `${customPizzaName} è stata aggiunta al carrello!`,

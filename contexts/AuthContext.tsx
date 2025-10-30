@@ -6,10 +6,7 @@ interface User {
   id: string;
   name: string;
   surname: string;
-  firstName?: string;
-  lastName?: string;
   email: string;
-  birthDate?: string;
   isChef?: boolean; // Flag per identificare se l'utente è un chef
 }
 
@@ -44,12 +41,14 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
+  // Stato separato per utente normale (user) e chef (chef): possibile fare login come normale O come chef ma mai insieme
   const [user, setUser] = useState<User | null>(null);
   const [chef, setChef] = useState<User | null>(null); // Stato separato per Chef
   const [isLoading, setIsLoading] = useState(true);
   const [resetWheelCooldownOnLogin, setResetWheelCooldownOnLogin] = useState<(() => void) | null>(null);
   const [logoutCallback, setLogoutCallback] = useState<(() => void) | null>(null);
 
+  // Effettua il controllo asincrono su storage degli eventuali login già attivi ogni mount/richiamo
   const checkAuthState = useCallback(async () => {
     try {
       const [userData, authToken, chefData, chefToken] = await Promise.all([
@@ -100,6 +99,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     checkAuthState();
   }, [checkAuthState]);
 
+  // Effettua login come normale utente (simulato, in demo niente chiamata backend reale)
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       // Simula autenticazione per utenti normali - in un'app reale qui faresti una chiamata API
@@ -134,6 +134,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  // Registrazione base: salva user e token, simula API
   const register = async (name: string, surname: string, email: string, password: string): Promise<boolean> => {
     try {
       // Simula registrazione - in un'app reale qui faresti una chiamata API
@@ -168,6 +169,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  // Login Chef: prevede credenziali distinte e gestisce routing separato, salvando chef separatamente
   const chefLogin = async (email: string, password: string): Promise<boolean> => {
     try {
       // Controlla se sono le credenziali del Chef
@@ -202,6 +204,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  // Aggiorna i dati del profilo utente
   const updateUser = async (userData: Partial<User>): Promise<void> => {
     try {
       if (user) {
@@ -214,6 +217,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  // Logout completo: utente normale. Chiama anche eventuali callback registered hook.
   const logout = async (): Promise<void> => {
     try {
       // Chiama il callback di logout per pulire i dati dell'utente corrente
@@ -232,6 +236,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  // Logout chef: separa il reset dallo stato utente
   const chefLogout = async (): Promise<void> => {
     try {
       await AsyncStorage.removeItem('chef');
@@ -245,6 +250,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  // Possibilità di registrare callback che risettano (ad es. il cooldown ruota, reset dati sessione, etc), utile quando cambiano contesti/app.
   const registerResetCallback = useCallback((callback: () => void) => {
     setResetWheelCooldownOnLogin(() => callback);
   }, []);

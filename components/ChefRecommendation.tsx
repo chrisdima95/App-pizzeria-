@@ -40,18 +40,19 @@ export function ChefRecommendation({
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
 
-  // Animazioni
+  // Animazioni per la comparsa della mascotte e del testo
   const [mascotteOpacity] = useState(new Animated.Value(0));
   const [mascotteScale] = useState(new Animated.Value(0.5));
   const [textOpacity] = useState(new Animated.Value(0));
   const [textTranslateX] = useState(new Animated.Value(-50));
 
-  // Testo dinamico
+  // Testo che verrà mostrato con effetto macchina da scrivere
   const [displayedText, setDisplayedText] = useState("");
   const [isTextComplete, setIsTextComplete] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
 
+  // Testo completo che verrà visualizzato
   const fullText = `Il nostro chef consiglia: ${pizza.name} - ${pizza.description}`;
 
   // Animazione del testo carattere per carattere
@@ -81,12 +82,12 @@ export function ChefRecommendation({
     }, 50); // Velocità di scrittura: 50ms per carattere
   }, [fullText, textOpacity, textTranslateX]);
 
-  // Animazione di apparizione della mascotte
+  // Effetto che lancia l'animazione della mascotte e successivamente quella del testo
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsAnimating(true);
 
-      // Prima appare la mascotte
+      // Animazione mascotte
       Animated.parallel([
         Animated.timing(mascotteOpacity, {
           toValue: 1,
@@ -100,12 +101,12 @@ export function ChefRecommendation({
           useNativeDriver: true,
         }),
       ]).start(() => {
-        // Poi appare il testo con animazione di scrittura
+        // Dopo mascotte, parte animazione del testo
         setTimeout(() => {
           animateText();
         }, 500);
       });
-    }, 2500); // Delay aumentato a 2.5 secondi per permettere all'animazione del carrello di completarsi
+    }, 2500); // Delay per sincronizzazione con animazioni precedenti
 
     return () => clearTimeout(timer);
   }, [animateText, mascotteOpacity, mascotteScale]);

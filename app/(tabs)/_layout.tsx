@@ -1,5 +1,4 @@
 import { Tabs } from "expo-router";
-import React from "react";
 
 import { HapticTab } from "@/components/haptic-tab";
 import { IconSymbol, MascotteIcon } from "@/components/ui";
@@ -15,6 +14,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].primary,
         tabBarInactiveTintColor: Colors[colorScheme ?? "light"].tabIconDefault,
         headerShown: false,
+        // Usa un componente custom che abilita haptic feedback sui tab
         tabBarButton: HapticTab,
       }}
     >
@@ -22,6 +22,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Menu",
+          // Icona personalizzata per la tab Menu
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="house.fill" color={color} />
           ),
@@ -49,6 +50,7 @@ export default function TabLayout() {
         name="chef"
         options={{
           title: "Chef",
+          // Nella tab chef viene usata la mascotte come icona
           tabBarIcon: ({ color }) => (
             <MascotteIcon size={28} color={color} />
           ),

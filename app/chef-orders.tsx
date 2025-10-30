@@ -78,23 +78,20 @@ export default function ChefOrdersScreen() {
     ]);
   };
 
-  // Funzione per filtrare gli ordini in base allo stato
+  // Filtra gli ordini a seconda dello stato richiesto dal filtro (pending/completed)
   const getFilteredOrders = () => {
     return allOrders.filter(order => {
-      // Un ordine è "pending" se ha almeno un item con status "pending"
-      // Un ordine è "completed" se tutti gli item sono completati (non pending)
+      // Un ordine è 'pending' se almeno un item è pending, 'completed' se tutti completati
       const hasPendingItems = order.some(item => item.status === 'pending');
-      
       if (selectedFilter === 'pending') {
         return hasPendingItems;
       } else {
-        // Per "completed", mostriamo gli ordini dove tutti gli item sono completati
         return !hasPendingItems;
       }
     });
   };
 
-  // Funzione per completare un intero ordine
+  // Funzione per marcare tutti gli item di un ordine come completi (stato 'completed') e salvataggio su AsyncStorage
   const completeOrder = (orderIndex: number) => {
     setAllOrders(prev => {
       const updated = [...prev];
@@ -102,20 +99,18 @@ export default function ChefOrdersScreen() {
         ...item,
         status: 'completed' as const
       }));
-      
-      // Salva negli ordini globali
+      // Salva lo stato dell'ordine aggiornato globalmente (accessibile da altri chef)
       try {
         const globalOrdersKey = 'globalOrders';
         AsyncStorage.setItem(globalOrdersKey, JSON.stringify(updated));
       } catch (error) {
         console.error('Errore nel salvataggio stato ordine:', error);
       }
-      
       return updated;
     });
   };
 
-  // Funzione per riportare un ordine a "in attesa"
+  // Funzione per riportare un ordine da 'completed' a 'pending' (utile per test/reset demo)
   const markOrderAsPending = (orderIndex: number) => {
     setAllOrders(prev => {
       const updated = [...prev];
@@ -123,15 +118,12 @@ export default function ChefOrdersScreen() {
         ...item,
         status: 'pending' as const
       }));
-      
-      // Salva negli ordini globali
       try {
         const globalOrdersKey = 'globalOrders';
         AsyncStorage.setItem(globalOrdersKey, JSON.stringify(updated));
       } catch (error) {
         console.error('Errore nel salvataggio stato ordine:', error);
       }
-      
       return updated;
     });
   };
@@ -175,6 +167,7 @@ export default function ChefOrdersScreen() {
     );
   };
 
+  // Per ogni ordine mostriamo lista dettagliata, cliente, quantità, stato, ecc. e pulsanti azione
   const renderOrder = ({ item: order, index: orderIndex }: { item: OrderItem[]; index: number }) => {
     const userEmail = order[0]?.userEmail || 'Email non disponibile';
     const totalAmount = order.reduce((sum, item) => {
@@ -196,7 +189,7 @@ export default function ChefOrdersScreen() {
       JSON.stringify(o.map(i => ({ id: i.id, quantity: i.quantity }))) === JSON.stringify(order.map(i => ({ id: i.id, quantity: i.quantity })))
     );
     
-    // Fallback: usa l'indice se non trovato
+    // safeOrderIndex ottiene la posizione reale nell'array originale (per eventuali azioni di update)
     const safeOrderIndex = originalOrderIndex >= 0 ? originalOrderIndex : allOrders.findIndex(o => o === order);
 
     return (

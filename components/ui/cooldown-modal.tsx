@@ -25,11 +25,12 @@ export function CooldownModal({
   const colors = Colors[colorScheme ?? "light"];
   const [displayTime, setDisplayTime] = useState(timeRemaining);
 
+  // Mantiene il tempo rimanente aggiornato quando cambia la prop
   useEffect(() => {
     setDisplayTime(timeRemaining);
   }, [timeRemaining]);
 
-  // Formatta il tempo rimanente
+  // Funzione per formattare il tempo rimanente in hh:mm:ss
   const formatTime = (ms: number) => {
     const hours = Math.floor(ms / (1000 * 60 * 60));
     const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
@@ -43,6 +44,7 @@ export function CooldownModal({
     };
   };
 
+  // Oggetto con orario formattato
   const time = formatTime(displayTime);
 
   return (

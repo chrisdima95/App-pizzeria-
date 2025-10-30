@@ -21,6 +21,7 @@ export function PizzaButton({
   style,
   textStyle,
 }: PizzaButtonProps) {
+  // Funzione per ottenere gli stili del bottone a seconda della variante (primary, accent, outline...)
   const getButtonStyle = () => {
     const baseStyle = [styles.button, styles[size]];
     
@@ -38,14 +39,21 @@ export function PizzaButton({
     }
   };
 
+  // Funzione per ottenere lo stile del testo in base alla variante
   const getTextStyle = () => {
-    const baseTextStyle = [styles.text, styles[`${size}Text`]];
+    const baseTextStyle = [styles.text, styles[`${size}Text` as keyof typeof styles]];
     
     switch (variant) {
+      case 'primary':
+        return [...baseTextStyle, styles.primaryText];
+      case 'secondary':
+        return [...baseTextStyle, styles.secondaryText];
+      case 'accent':
+        return [...baseTextStyle, styles.accentText];
       case 'outline':
-        return [...baseTextStyle, styles.outlineText, disabled && styles.disabledText];
+        return [...baseTextStyle, styles.outlineText];
       default:
-        return [...baseTextStyle, styles.primaryText, disabled && styles.disabledText];
+        return [...baseTextStyle, styles.primaryText];
     }
   };
 
@@ -54,7 +62,7 @@ export function PizzaButton({
       style={[...getButtonStyle(), style]}
       onPress={onPress}
       disabled={disabled}
-      activeOpacity={0.8}
+      activeOpacity={0.7}
     >
       <Text style={[...getTextStyle(), textStyle]}>{title}</Text>
     </TouchableOpacity>
@@ -64,12 +72,24 @@ export function PizzaButton({
 const styles = StyleSheet.create({
   button: {
     borderRadius: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    ...PizzaColors.shadows.medium,
+    flexDirection: 'row',
   },
-  
-  // Varianti
+  small: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  medium: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  large: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+  },
   primary: {
     backgroundColor: PizzaColors.primary,
   },
@@ -84,46 +104,13 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: PizzaColors.primary,
   },
-  
-  // Dimensioni
-  small: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    minHeight: 36,
-  },
-  medium: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    minHeight: 44,
-  },
-  large: {
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    minHeight: 52,
-  },
-  
-  // Stati
   disabled: {
     opacity: 0.5,
-    ...PizzaColors.shadows.small,
   },
-  
-  // Testo
   text: {
     fontWeight: '600',
     textAlign: 'center',
   },
-  primaryText: {
-    color: PizzaColors.white,
-  },
-  outlineText: {
-    color: PizzaColors.primary,
-  },
-  disabledText: {
-    opacity: 0.7,
-  },
-  
-  // Dimensioni del testo
   smallText: {
     fontSize: 14,
   },
@@ -132,5 +119,17 @@ const styles = StyleSheet.create({
   },
   largeText: {
     fontSize: 18,
+  },
+  primaryText: {
+    color: 'white',
+  },
+  secondaryText: {
+    color: 'white',
+  },
+  accentText: {
+    color: 'white',
+  },
+  outlineText: {
+    color: PizzaColors.primary,
   },
 });

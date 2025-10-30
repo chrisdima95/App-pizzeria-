@@ -15,8 +15,10 @@ export function ThemedText({
   type = 'default',
   ...rest
 }: ThemedTextProps) {
+  // Sceglie dinamicamente il colore di testo secondo light o dark mode
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
 
+  // Restituisce il componente Text con gli stili opportuni a seconda del tipo
   return (
     <Text
       style={[

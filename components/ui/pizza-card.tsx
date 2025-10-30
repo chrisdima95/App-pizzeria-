@@ -15,6 +15,7 @@ export function PizzaCard({
   variant = 'default',
   padding = 'medium',
 }: PizzaCardProps) {
+  // Determina quali stili applicare alla card in base a variante e padding
   const getCardStyle = () => {
     const baseStyle = [styles.card, styles[padding]];
     

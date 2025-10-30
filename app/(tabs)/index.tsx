@@ -55,30 +55,23 @@ export default function HomeScreen() {
   const [selectedCategory, setSelectedCategory] =
     useState<PizzaCategory>("rosse");
 
-  // Hook per le animazioni di transizione (senza mascotte)
-  const {
-    startAnimations,
-    backgroundAnimatedStyle,
-  } = useTransitionAnimations();
+  // Hook custom per animazioni background e montaggio
+  const { startAnimations, backgroundAnimatedStyle } = useTransitionAnimations();
 
-  // Avvia le animazioni quando il componente viene montato
+  // Avvia le animazioni solo al mount del componente (una volta)
   useEffect(() => {
     // Piccolo delay per permettere alla transizione di completarsi
     const timer = setTimeout(() => {
       startAnimations();
     }, 100);
-
     return () => clearTimeout(timer);
   }, [startAnimations]);
 
-  // Pizza consigliata dinamica - cambia casualmente ad ogni avvio dell'app
+  // Estrae una pizza raccomandata dallo chef randomicamente ad ogni apertura
   const getChefRecommendation = () => {
-    // Genera un numero casuale per ogni avvio dell'app
     const randomIndex = Math.floor(Math.random() * pizzas.length);
-
     return pizzas[randomIndex];
   };
-
   const chefRecommendation = getChefRecommendation();
 
   const categories: { key: PizzaCategory; label: string }[] = [
@@ -87,6 +80,7 @@ export default function HomeScreen() {
     { key: "speciali", label: "Speciali" },
   ];
 
+  // Filtro pizze per categoria tab selezionata
   const filteredPizzas = pizzas.filter(
     (pizza) => pizza.category === selectedCategory
   );
@@ -97,16 +91,13 @@ export default function HomeScreen() {
     return baseOrder ? baseOrder.quantity : 0;
   };
 
+  // Funzione per gestire aggiunta rapida di una pizza (solo variante base)
   const handleAddPizza = (pizza: Pizza) => {
-    // Dal menu si aggiunge sempre la versione BASE senza personalizzazioni
-    // Usa solo il pizza.id (non gli ID univoci della pagina dettagli)
     const existingOrder = orders.find((order) => order.id === pizza.id);
-
     if (existingOrder) {
-      // Se esiste già una pizza base identica, aumenta la quantità
+      // Incrementa quantità direttamente se già presente
       updateQuantity(existingOrder.id, existingOrder.quantity + 1);
     } else {
-      // Se non esiste, aggiungi un nuovo ordine con ID base
       addToOrder({
         id: pizza.id,
         name: pizza.name,
@@ -116,11 +107,11 @@ export default function HomeScreen() {
     }
   };
 
+  // Funzione per incrementare o decrementare velocemente la quantità della pizza
   const handleUpdateQuantity = (pizzaId: string, quantity: number) => {
     if (quantity <= 0) {
       removeFromOrder(pizzaId);
     } else {
-      // Trova l'ordine con questo ID esatto
       const existingOrder = orders.find((order) => order.id === pizzaId);
       if (existingOrder) {
         updateQuantity(existingOrder.id, quantity);

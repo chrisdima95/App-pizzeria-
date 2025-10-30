@@ -26,33 +26,30 @@ export default function CheckoutScreen() {
   const colors = Colors[colorScheme ?? "light"];
   const { showModal, hideModal, ModalComponent } = usePizzaModal();
 
-  // Calcola il totale dell'ordine
+  // Calcola il totale dell'ordine sommando prezzo*quantità di ogni pizza
   const totalPrice = orders.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
 
-  //
-
+  // Funzione per confermare l'ordine. Mostra modale differente se utente loggato o no.
   const handleConfirmOrder = () => {
     if (!orders || orders.length === 0) {
       showModal("Carrello vuoto", "Non ci sono pizze da ordinare.");
       return;
     }
 
-    // Se l'utente è loggato, comportamento normale: salva l'ordine e va agli ordini
+    // Utente autenticato: salva l'ordine e va alla pagina ordini
     if (isAuthenticated) {
       const goToOrders = async () => {
         await confirmOrder();
         router.dismiss();
         router.push("/ordini");
       };
-
       if (Platform.OS === "web") {
         goToOrders();
         return;
       }
-
       showModal(
         "Ordine confermato",
         "Il tuo ordine è stato confermato con successo!",
@@ -64,24 +61,17 @@ export default function CheckoutScreen() {
         ]
       );
     } else {
-      // Se l'utente NON è loggato, salva l'ordine come ospite e torna al Menù
+      // Guest: salva l'ordine solo localmente e torna al menu
       const resetCartAndGoToMenu = async () => {
-        // Chiudi prima il modale "Ordine confermato" per una transizione più fluida
         hideModal();
-        // Salva l'ordine come ospite negli ordini globali per il chef
         await confirmOrderAsGuest();
-        
-        // Usa requestAnimationFrame per sincronizzare con il ciclo di rendering
         requestAnimationFrame(() => {
-          // Chiudi il modal del checkout
           router.dismiss();
-          // Aspetta che l'animazione di chiusura del modal si completi prima di navigare
           setTimeout(() => {
             router.replace("/(tabs)");
-          }, 300); // Delay ottimizzato per l'animazione del modal (slide down)
+          }, 300);
         });
       };
-
       if (Platform.OS === "web") {
         confirmOrderAsGuest().then(() => {
           router.dismiss();
@@ -89,7 +79,6 @@ export default function CheckoutScreen() {
         });
         return;
       }
-
       showModal(
         "Ordine confermato",
         "Il tuo ordine è stato confermato con successo!",
@@ -103,6 +92,7 @@ export default function CheckoutScreen() {
     }
   };
 
+  // Funzione per svuotare l'intero carrello con conferma utente
   const handleClearCart = () => {
     if (orders.length === 0) {
       showModal("Carrello vuoto", "Il carrello è già vuoto.");

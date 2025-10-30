@@ -17,8 +17,10 @@ export function PizzaLoading({
   style,
   textStyle,
 }: PizzaLoadingProps) {
+  // Inizializza il valore animato per la rotazione dello spinner
   const spinValue = useRef(new Animated.Value(0)).current;
 
+  // Imposta il loop di animazione per far ruotare continuamente lo spinner
   useEffect(() => {
     const spin = Animated.loop(
       Animated.timing(spinValue, {
@@ -32,11 +34,13 @@ export function PizzaLoading({
     return () => spin.stop();
   }, [spinValue]);
 
+  // Interpolazione del valore animato per creare la rotazione
   const spin = spinValue.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'],
   });
 
+  // Restituisce gli stili per lo spinner in base al colore richiesto
   const getSpinnerStyle = () => {
     const baseStyle = [styles.spinner, styles[size]];
     

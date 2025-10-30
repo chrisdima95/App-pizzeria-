@@ -12,6 +12,10 @@ interface UsePizzaModalReturn {
   ModalComponent: any;
 }
 
+/**
+ * Hook per gestire comodamente un modale custom a livello componente.
+ * Restituisce: stato open/close, funzione per mostrare/nascondere modale e componente React da instanziare.
+ */
 export const usePizzaModal = (): UsePizzaModalReturn => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
@@ -20,6 +24,7 @@ export const usePizzaModal = (): UsePizzaModalReturn => {
     { text: "OK" },
   ]);
 
+  // Mostra il modale con parametri di titolo, messaggio e bottoni personalizzabili
   const showModal = (
     title: string,
     message?: string,
@@ -35,9 +40,9 @@ export const usePizzaModal = (): UsePizzaModalReturn => {
     setModalVisible(false);
   };
 
+  // Componente React pronto da inserire (si preoccupa lui di NON renderizzare se modale chiuso)
   const ModalComponent = () => {
     if (!modalVisible) return null;
-
     return (
       <PizzaModal
         visible={modalVisible}
@@ -49,6 +54,7 @@ export const usePizzaModal = (): UsePizzaModalReturn => {
     );
   };
 
+  // Permette ai consumer di agganciare il componente e triggerare show/hide con params
   return {
     modalVisible,
     showModal,

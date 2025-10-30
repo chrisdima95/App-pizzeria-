@@ -30,7 +30,7 @@ export default function ChefScreen() {
   const colors = Colors[colorScheme ?? "light"];
   const { showModal, ModalComponent } = usePizzaModal();
 
-  // Redirect solo se già autenticato come chef
+  // useEffect: in caso di login chef già attivo, fa redirect diretto agli ordini chef
   useEffect(() => {
     if (!authLoading && isChefAuthenticated && chef) {
       // Solo se il chef è già autenticato, vai alla pagina degli ordini chef
@@ -55,13 +55,13 @@ export default function ChefScreen() {
     return null;
   }
 
+  // Funzione login chef: controlla prima se l'utente è già loggato come normale
   const handleChefLogin = async () => {
     if (!email.trim() || !password.trim()) {
       showModal("Errore", "Inserisci email e password");
       return;
     }
-
-    // Controlla se l'utente è già loggato come cliente
+    // Blocco per evitare doppia autenticazione (cliente e chef)
     if (isAuthenticated && user && !user.isChef) {
       showModal(
         "Sessione Attiva",
